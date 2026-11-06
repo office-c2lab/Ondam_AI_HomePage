@@ -1,36 +1,51 @@
 const footerMenus = [
   {
-    title: '회사소개',
+    title: '기업소개',
     links: [
-      ['회사소개', '#about'],
+      ['기업소개', '#about'],
       ['비전과 미션', '#vision'],
       ['핵심역량', '#capabilities'],
-      ['연혁', '#history'],
+      ['핵심 인력', '#team'],
     ],
   },
   {
     title: '솔루션&서비스',
     links: [
-      ['ONDAM AI', '#ondam-ai'],
-      ['AI 에이전트', '#ai-agent'],
-      ['업무 자동화', '#automation'],
-      ['AI 컨설팅', '#consulting'],
+      ['플랫폼 개요', '#platform-overview'],
+      ['Discover', '#discover'],
+      ['Control Internal', '#control-internal'],
+      ['Control External', '#control-external'],
+      ['Manage', '#manage'],
     ],
   },
   {
-    title: '홍보센터',
+    title: '핵심기술',
     links: [
-      ['회사소식', '#news'],
-      ['보도자료', '#press'],
-      ['자료실', '#resources'],
+      ['AI Intelligence', '#enterprise-ai-intelligence'],
+      ['Policy Engine', '#policy-engine'],
+      ['LLM Intelligence', '#service-intelligence'],
+      ['Multi LLM', '#multi-llm'],
+      ['AI Governance', '#ai-governance'],
+    ],
+  },
+  {
+    title: '채용',
+    links: [
+      ['인재상', '#talent'],
+      ['직무 소개', '#roles'],
+      ['채용 공고', '#openings'],
+      ['채용 절차', '#hiring-process'],
+      ['복리후생', '#benefits'],
     ],
   },
   {
     title: '고객지원',
     links: [
       ['도입 문의', '#contact'],
-      ['제휴 문의', '#partnership'],
+      ['오시는 길', '#location'],
       ['FAQ', '#faq'],
+      ['기업소식', '#news'],
+      ['기술 블로그', '#tech-blog'],
     ],
   },
 ];
@@ -79,8 +94,11 @@ export default function Footer() {
                   |
                 </span>
                 <span className="font-bold text-[#101828]">전화번호</span>
-                <a href="tel:02-6956-7950" className="transition hover:text-[var(--brand-primary)]">
-                  02-6956-7950
+                <a
+                  href="tel:010-5595-4945"
+                  className="transition hover:text-[var(--brand-primary)]"
+                >
+                  010-5595-4945
                 </a>
                 <span className="text-[#98a2b3]" aria-hidden="true">
                   |
@@ -91,7 +109,10 @@ export default function Footer() {
             </address>
           </div>
 
-          <nav className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-4" aria-label="푸터 메뉴">
+          <nav
+            className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 xl:grid-cols-5"
+            aria-label="푸터 메뉴"
+          >
             {footerMenus.map(menu => (
               <div key={menu.title}>
                 <strong className="text-base font-bold text-[#101828]">{menu.title}</strong>
