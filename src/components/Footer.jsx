@@ -31,11 +31,11 @@ const footerMenus = [
   {
     title: '채용',
     links: [
-      ['인재상', '#talent'],
-      ['직무 소개', '#roles'],
-      ['채용 공고', '#openings'],
-      ['채용 절차', '#hiring-process'],
-      ['복리후생', '#benefits'],
+      ['인재상', '/careers#talent'],
+      ['직무 소개', '/careers#roles'],
+      ['채용 공고', '/careers#openings'],
+      ['채용 절차', '/careers#hiring-process'],
+      ['복리후생', '/careers#benefits'],
     ],
   },
   {

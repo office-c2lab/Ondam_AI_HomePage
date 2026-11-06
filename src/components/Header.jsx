@@ -26,6 +26,8 @@ function HeaderLogo({ inverse = false }) {
 }
 
 export default function Header() {
+  const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  const isCareersPage = currentPath === '/careers';
   const items = useMemo(
     () => [
       {
@@ -62,13 +64,13 @@ export default function Header() {
       },
       {
         label: '채용',
-        href: '#careers',
+        href: '/careers',
         children: [
-          { label: '인재상', href: '#talent' },
-          { label: '직무 소개', href: '#roles' },
-          { label: '채용 공고', href: '#openings' },
-          { label: '채용 절차', href: '#hiring-process' },
-          { label: '복리후생', href: '#benefits' },
+          { label: '인재상', href: '/careers#talent' },
+          { label: '직무 소개', href: '/careers#roles' },
+          { label: '채용 공고', href: '/careers#openings' },
+          { label: '채용 절차', href: '/careers#hiring-process' },
+          { label: '복리후생', href: '/careers#benefits' },
         ],
       },
       {
@@ -178,7 +180,7 @@ export default function Header() {
     moveIndicatorTo(event.currentTarget.querySelector('[data-menu-trigger]'), index);
   };
 
-  const hasSolidBackground = !isAtTop || isDropdownOpen;
+  const hasSolidBackground = isCareersPage || !isAtTop || isDropdownOpen;
   const foregroundClass = 'text-[#1c2025]';
 
   return (

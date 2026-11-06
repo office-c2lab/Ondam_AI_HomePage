@@ -1,13 +1,15 @@
-import Contact from './components/Contact.jsx';
-import Directions from './components/Directions.jsx';
-import Faq from './components/Faq.jsx';
 import Footer from './components/Footer.jsx';
 import Header from './components/Header.jsx';
-import Privacy from './components/Privacy.jsx';
+import Careers from './pages/Careers.jsx';
+import Contact from './pages/Contact.jsx';
+import Directions from './pages/Directions.jsx';
+import Faq from './pages/Faq.jsx';
+import Privacy from './pages/Privacy.jsx';
 
 export default function App() {
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
   const pages = {
+    '/careers': <Careers />,
     '/contact': <Contact />,
     '/location': <Directions />,
     '/faq': <Faq />,
