@@ -39,11 +39,24 @@ button {
 }
 
 a {
-  
   text-decoration: none;
 }
 
 button,
-a[href] {
+a[href],
+select,
+summary,
+input[type='checkbox'],
+input[type='radio'],
+input[type='submit'],
+input[type='button'],
+[role='button'],
+[role='option'] {
   cursor: pointer;
+}
+
+button:disabled,
+select:disabled,
+input:disabled {
+  cursor: not-allowed;
 }

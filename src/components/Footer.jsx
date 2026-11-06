@@ -41,9 +41,9 @@ const footerMenus = [
   {
     title: '고객지원',
     links: [
-      ['도입 문의', '#contact'],
-      ['오시는 길', '#location'],
-      ['FAQ', '#faq'],
+      ['도입 문의', '/contact'],
+      ['오시는 길', '/location'],
+      ['FAQ', '/faq'],
     ],
   },
 ];
@@ -140,7 +140,7 @@ export default function Footer() {
             >
               개인정보처리방침
             </a>
-            <a href="#contact" className="transition hover:text-[#101828]">
+            <a href="/contact" className="transition hover:text-[#101828]">
               문의하기
             </a>
           </div>

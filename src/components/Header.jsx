@@ -75,9 +75,9 @@ export default function Header() {
         label: '고객지원',
         href: '#support',
         children: [
-          { label: '도입 문의', href: '#contact' },
-          { label: '오시는 길', href: '#location' },
-          { label: 'FAQ', href: '#faq' },
+          { label: '도입 문의', href: '/contact' },
+          { label: '오시는 길', href: '/location' },
+          { label: 'FAQ', href: '/faq' },
         ],
       },
     ],
