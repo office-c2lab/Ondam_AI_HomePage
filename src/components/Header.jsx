@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronDown, Globe2, Menu, Search, X } from 'lucide-react';
+import { ChevronDown, Menu, X } from 'lucide-react';
 
 const HEADER_HEIGHT = 90;
 
@@ -29,16 +29,6 @@ export default function Header() {
   const items = useMemo(
     () => [
       {
-        label: '솔루션&서비스',
-        href: '#solutions',
-        children: [
-          { label: 'ONDAM AI', href: '#ondam-ai' },
-          { label: 'AI 에이전트', href: '#ai-agent' },
-          { label: '업무 자동화', href: '#automation' },
-          { label: 'AI 컨설팅', href: '#consulting' },
-        ],
-      },
-      {
         label: '회사소개',
         href: '#company',
         children: [
@@ -46,6 +36,16 @@ export default function Header() {
           { label: '비전과 미션', href: '#vision' },
           { label: '핵심역량', href: '#capabilities' },
           { label: '연혁', href: '#history' },
+        ],
+      },
+      {
+        label: '솔루션&서비스',
+        href: '#solutions',
+        children: [
+          { label: 'ONDAM AI', href: '#ondam-ai' },
+          { label: 'AI 에이전트', href: '#ai-agent' },
+          { label: '업무 자동화', href: '#automation' },
+          { label: 'AI 컨설팅', href: '#consulting' },
         ],
       },
       {
@@ -83,6 +83,7 @@ export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [openMobileMenu, setOpenMobileMenu] = useState(null);
   const [activeMenuIndex, setActiveMenuIndex] = useState(null);
+  const [activeSitemapChild, setActiveSitemapChild] = useState(null);
   const [indicator, setIndicator] = useState({ left: 0, width: 0, visible: false });
   const lastScrollTop = useRef(0);
   const navRef = useRef(null);
@@ -143,6 +144,7 @@ export default function Header() {
     setIsDropdownOpen(false);
     setOpenMobileMenu(null);
     setActiveMenuIndex(null);
+    setActiveSitemapChild(null);
     setIndicator(current => ({ ...current, visible: false }));
   };
 
@@ -259,20 +261,6 @@ export default function Header() {
           >
             <button
               type="button"
-              className="hidden h-10 w-10 place-items-center transition-colors hover:text-[var(--brand-primary)] min-[681px]:grid"
-              aria-label="언어 선택"
-            >
-              <Globe2 className="h-[22px] w-[22px]" strokeWidth={1.8} />
-            </button>
-            <button
-              type="button"
-              className="hidden h-10 w-10 place-items-center transition-colors hover:text-[var(--brand-primary)] min-[681px]:grid"
-              aria-label="검색 열기"
-            >
-              <Search className="h-6 w-6" strokeWidth={1.8} />
-            </button>
-            <button
-              type="button"
               className="grid h-11 w-11 place-items-center transition-colors hover:text-[var(--brand-primary)]"
               aria-label="전체 메뉴 열기"
               aria-expanded={isMenuOpen}
@@ -305,20 +293,6 @@ export default function Header() {
             <HeaderLogo inverse />
           </a>
           <div className="flex items-center gap-2 min-[981px]:gap-5">
-            <button
-              type="button"
-              className="hidden h-10 w-10 place-items-center min-[681px]:grid"
-              aria-label="언어 선택"
-            >
-              <Globe2 className="h-[22px] w-[22px]" strokeWidth={1.8} />
-            </button>
-            <button
-              type="button"
-              className="hidden h-10 w-10 place-items-center min-[681px]:grid"
-              aria-label="검색 열기"
-            >
-              <Search className="h-6 w-6" strokeWidth={1.8} />
-            </button>
             <button
               type="button"
               className="group grid h-11 w-11 place-items-center"
@@ -382,11 +356,11 @@ export default function Header() {
             {items.map(item => (
               <div
                 key={`sitemap-${item.href}`}
-                className="group/sitemap py-6 min-[681px]:min-h-60 min-[681px]:border-r min-[681px]:border-white/20 min-[681px]:px-7 min-[681px]:py-4 min-[681px]:transition-colors min-[681px]:duration-300 min-[681px]:hover:border-white/40 min-[1200px]:min-h-[320px] min-[1200px]:w-[calc((100%-200px)/5)] min-[1200px]:shrink-0 min-[1200px]:px-0 min-[1200px]:last:border-r-0"
+                className="py-6 min-[681px]:min-h-60 min-[681px]:border-r min-[681px]:border-white/15 min-[681px]:px-7 min-[681px]:py-4 min-[1200px]:min-h-[320px] min-[1200px]:w-[calc((100%-200px)/5)] min-[1200px]:shrink-0 min-[1200px]:px-0 min-[1200px]:last:border-r-0"
               >
                 <a
                   href={item.href}
-                  className="block text-[28px] leading-[40px] font-bold tracking-[-0.84px] transition-colors duration-300 group-hover/sitemap:text-[#8BC6FF]"
+                  className="block text-[28px] leading-[40px] font-bold tracking-[-0.84px] transition-colors duration-300"
                   onClick={closeMenus}
                 >
                   {item.label}
@@ -396,7 +370,13 @@ export default function Header() {
                     <li key={`sitemap-${child.href}`}>
                       <a
                         href={child.href}
-                        className="inline-block text-[18px] leading-8 font-normal tracking-[-0.54px] text-white/80 transition-[color,transform] duration-300 hover:translate-x-1 hover:text-[#8BC6FF]"
+                        className="inline-block text-[18px] leading-8 font-normal tracking-[-0.54px] transition-[color,transform] duration-300"
+                        style={{
+                          color:
+                            activeSitemapChild === child.href ? '#ffffff' : 'rgba(255,255,255,0.8)',
+                        }}
+                        onPointerEnter={() => setActiveSitemapChild(child.href)}
+                        onPointerLeave={() => setActiveSitemapChild(null)}
                         onClick={closeMenus}
                       >
                         {child.label}
