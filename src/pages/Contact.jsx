@@ -183,17 +183,19 @@ export default function Contact() {
     >
       <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-5 pt-[calc(var(--site-header-height)+4rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+5rem)] sm:pb-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(540px,1.1fr)] lg:gap-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+6rem)] lg:pb-24 min-[1600px]:px-0">
         <div className="lg:sticky lg:top-[120px] lg:self-start lg:pt-5">
-          <h1 className="mt-6 text-4xl leading-[1.18] font-bold tracking-[-0.045em] text-[#101828] sm:text-5xl lg:text-[56px]">
-            기업의 AI 활용,
-            <br />
-            온담AI와 함께 시작하세요.
-          </h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-[#667085] sm:text-lg sm:leading-8">
-            ONDAM AI 도입과 기술 협력에 대해 궁금한 점을 남겨주세요.
-            <br className="hidden sm:block" /> 담당자가 확인 후 안내해 드리겠습니다.
-          </p>
+          <div className="page-enter page-enter-up">
+            <h1 className="mt-6 text-4xl leading-[1.18] font-bold tracking-[-0.045em] text-[#101828] sm:text-5xl lg:text-[56px]">
+              기업의 AI 활용,
+              <br />
+              온담AI와 함께 시작하세요.
+            </h1>
+            <p className="mt-6 max-w-xl text-base leading-7 text-[#667085] sm:text-lg sm:leading-8">
+              ONDAM AI 도입과 기술 협력에 대해 궁금한 점을 남겨주세요.
+              <br className="hidden sm:block" /> 담당자가 확인 후 안내해 드리겠습니다.
+            </p>
+          </div>
 
-          <div className="relative mt-12 min-h-[430px] overflow-hidden rounded-2xl bg-[#e8f0ff] p-7 sm:p-10">
+          <div className="page-enter page-enter-up contact-enter-logo relative mt-12 min-h-[430px] overflow-hidden rounded-2xl bg-[#e8f0ff] p-7 sm:p-10">
             <div
               className="absolute inset-0 opacity-45 [background-image:linear-gradient(rgba(7,93,246,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(7,93,246,0.08)_1px,transparent_1px)] [background-size:32px_32px]"
               aria-hidden="true"
@@ -212,7 +214,7 @@ export default function Contact() {
         </div>
 
         <form
-          className="rounded-2xl border border-[#e1e6ef] bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-9 lg:p-11"
+          className="page-enter page-enter-up contact-enter-form rounded-2xl border border-[#e1e6ef] bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-9 lg:p-11"
           onSubmit={handleSubmit}
         >
           <div className="space-y-6">

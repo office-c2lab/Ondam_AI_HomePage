@@ -31,11 +31,17 @@ const transportOptions = [
   },
 ];
 
+const transportAnimationDelays = [
+  'directions-enter-subway',
+  'directions-enter-bus',
+  'directions-enter-car',
+];
+
 export default function Directions() {
   return (
     <section id="location" className="scroll-mt-[90px] bg-white">
-      <div className="mx-auto w-full max-w-[1600px] px-5 pt-[calc(var(--site-header-height)+3rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+3.5rem)] sm:pb-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+5rem)] lg:pb-28 min-[1600px]:px-0">
-        <div className="mx-auto mb-10 max-w-4xl text-center lg:mb-14">
+      <div className="mx-auto w-full max-w-[1600px] px-5 pt-[calc(var(--site-header-height)+3rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+3.5rem)] sm:pb-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+4rem)] lg:pb-28 min-[1600px]:px-0">
+        <div className="page-enter page-enter-up mx-auto mb-10 max-w-4xl text-center lg:mb-14">
           <h1 className="text-4xl leading-tight font-bold tracking-[-0.04em] text-[#101828] sm:text-5xl lg:text-[56px]">
             오시는 길
           </h1>
@@ -48,8 +54,8 @@ export default function Directions() {
           </p>
         </div>
 
-        <div className="grid gap-12 xl:grid-cols-[minmax(0,1.7fr)_minmax(340px,0.65fr)] xl:gap-14">
-          <div className="flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-[#dfe5ee] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:min-h-[650px]">
+        <div className="grid items-stretch gap-10 xl:grid-cols-[minmax(0,1.65fr)_minmax(360px,0.7fr)] xl:gap-12">
+          <div className="page-enter page-enter-up directions-enter-map flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-[#dfe5ee] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:min-h-[650px]">
             <iframe
               title="온담AI 위치 지도"
               src={`https://www.google.com/maps?q=${mapCoordinates}&z=17&output=embed`}
@@ -80,15 +86,15 @@ export default function Directions() {
             </div>
           </div>
 
-          <aside>
-            <div className="grid border-y border-[#dfe5ee] md:grid-cols-3 xl:grid-cols-1">
+          <aside className="h-full">
+            <div className="grid h-full border-y border-[#dfe5ee] md:grid-cols-3 xl:grid-cols-1 xl:grid-rows-3">
               {transportOptions.map((option, index) => {
                 const Icon = option.icon;
 
                 return (
                   <article
                     key={option.title}
-                    className={`py-8 md:px-8 xl:px-0 ${
+                    className={`page-enter page-enter-up ${transportAnimationDelays[index]} py-8 md:px-8 xl:flex xl:flex-col xl:justify-center xl:px-1 ${
                       index < transportOptions.length - 1
                         ? 'border-b border-[#dfe5ee] md:border-r md:border-b-0 xl:border-r-0 xl:border-b'
                         : ''
