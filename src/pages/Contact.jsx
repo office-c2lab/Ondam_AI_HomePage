@@ -179,9 +179,9 @@ export default function Contact() {
   return (
     <section
       id="contact"
-      className="min-h-[calc(100svh-90px)] bg-white bg-[radial-gradient(ellipse_72%_78%_at_92%_68%,#075df6_0%,#3f7af0_28%,#a9c0f2_52%,#e9effb_72%,#ffffff_100%)]"
+      className="min-h-screen bg-white bg-[radial-gradient(ellipse_72%_78%_at_92%_68%,#075df6_0%,#3f7af0_28%,#a9c0f2_52%,#e9effb_72%,#ffffff_100%)]"
     >
-      <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-5 py-16 sm:px-6 sm:py-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(540px,1.1fr)] lg:gap-20 lg:px-8 lg:py-24 min-[1600px]:px-0">
+      <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-5 pt-[calc(var(--site-header-height)+4rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+5rem)] sm:pb-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(540px,1.1fr)] lg:gap-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+6rem)] lg:pb-24 min-[1600px]:px-0">
         <div className="lg:sticky lg:top-[120px] lg:self-start lg:pt-5">
           <h1 className="mt-6 text-4xl leading-[1.18] font-bold tracking-[-0.045em] text-[#101828] sm:text-5xl lg:text-[56px]">
             기업의 AI 활용,

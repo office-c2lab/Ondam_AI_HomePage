@@ -5,7 +5,7 @@ const footerMenus = [
       ['기업소개', '#about'],
       ['비전과 미션', '#vision'],
       ['핵심역량', '#capabilities'],
-      ['핵심 인력', '#team'],
+      ['핵심 인력', '/team'],
     ],
   },
   {

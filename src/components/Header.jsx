@@ -37,7 +37,7 @@ export default function Header() {
           { label: '회사소개', href: '#about' },
           { label: '비전과 미션', href: '#vision' },
           { label: '핵심역량', href: '#capabilities' },
-          { label: '핵심 인력', href: '#team' },
+          { label: '핵심 인력', href: '/team' },
         ],
       },
       {
@@ -85,8 +85,8 @@ export default function Header() {
     ],
     []
   );
-  const [isAtTop, setIsAtTop] = useState(true);
   const [isHidden, setIsHidden] = useState(false);
+  const [isScrolledHeaderSolid, setIsScrolledHeaderSolid] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [openMobileMenu, setOpenMobileMenu] = useState(null);
@@ -101,7 +101,11 @@ export default function Header() {
       const scrollTop = Math.max(window.scrollY, 0);
       const delta = scrollTop - lastScrollTop.current;
 
-      setIsAtTop(scrollTop <= 10);
+      if (scrollTop <= 10) {
+        setIsScrolledHeaderSolid(false);
+      } else if (delta < -5) {
+        setIsScrolledHeaderSolid(true);
+      }
 
       if (!isMenuOpen && Math.abs(delta) > 5) {
         if (scrollTop > lastScrollTop.current && scrollTop > HEADER_HEIGHT) {
@@ -180,15 +184,22 @@ export default function Header() {
     moveIndicatorTo(event.currentTarget.querySelector('[data-menu-trigger]'), index);
   };
 
-  const hasSolidBackground = isCareersPage || !isAtTop || isDropdownOpen;
-  const foregroundClass = 'text-[#1c2025]';
+  const hasSolidBackground = isScrolledHeaderSolid || isDropdownOpen;
+  const useOverlayColors = isCareersPage && !hasSolidBackground;
+  const foregroundClass = useOverlayColors ? 'text-white' : 'text-[#1c2025]';
 
   return (
     <>
       <header
-        className={`fixed inset-x-0 top-0 z-[80] transition-[transform,background-color,box-shadow] duration-400 ease-out ${
-          isHidden && !isMenuOpen ? '-translate-y-full' : 'translate-y-0'
-        } ${hasSolidBackground ? 'bg-white shadow-[0_8px_30px_rgba(23,23,23,0.08)]' : 'bg-transparent'}`}
+        className={`fixed inset-x-0 top-0 z-[80] will-change-[translate,opacity] transition-[translate,opacity,background-color,box-shadow,backdrop-filter] duration-[480ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
+          isHidden && !isMenuOpen
+            ? 'pointer-events-none -translate-y-full opacity-0'
+            : 'translate-y-0 opacity-100'
+        } ${
+          hasSolidBackground
+            ? 'bg-white/95 shadow-[0_8px_30px_rgba(23,23,23,0.08)] backdrop-blur-xl'
+            : 'bg-transparent shadow-none backdrop-blur-0'
+        }`}
       >
         <div
           className={`pointer-events-none absolute inset-x-0 top-0 hidden overflow-hidden bg-white shadow-[0_12px_32px_rgba(23,23,23,0.1)] transition-[height,opacity] duration-400 min-[1200px]:block ${
@@ -206,7 +217,7 @@ export default function Header() {
             aria-label="ONDAM AI 홈"
             onClick={closeMenus}
           >
-            <HeaderLogo />
+            <HeaderLogo inverse={useOverlayColors} />
           </a>
 
           <nav
@@ -247,7 +258,12 @@ export default function Header() {
                   data-menu-trigger
                   className="flex h-[90px] shrink-0 items-center whitespace-nowrap text-[18px] font-semibold transition-colors duration-300"
                   style={{
-                    color: activeMenuIndex === index ? 'var(--brand-primary)' : '#1c2025',
+                    color:
+                      activeMenuIndex === index
+                        ? 'var(--brand-primary)'
+                        : useOverlayColors
+                          ? '#ffffff'
+                          : '#1c2025',
                   }}
                   onFocus={event => {
                     setIsDropdownOpen(true);

@@ -34,7 +34,7 @@ const transportOptions = [
 export default function Directions() {
   return (
     <section id="location" className="scroll-mt-[90px] bg-white">
-      <div className="mx-auto w-full max-w-[1600px] px-5 pt-12 pb-16 sm:px-6 sm:pt-14 sm:pb-20 lg:px-8 lg:pt-20 lg:pb-28 min-[1600px]:px-0">
+      <div className="mx-auto w-full max-w-[1600px] px-5 pt-[calc(var(--site-header-height)+3rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+3.5rem)] sm:pb-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+5rem)] lg:pb-28 min-[1600px]:px-0">
         <div className="mx-auto mb-10 max-w-4xl text-center lg:mb-14">
           <h1 className="text-4xl leading-tight font-bold tracking-[-0.04em] text-[#101828] sm:text-5xl lg:text-[56px]">
             오시는 길

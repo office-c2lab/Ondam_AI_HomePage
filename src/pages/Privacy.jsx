@@ -143,7 +143,7 @@ export default function Privacy() {
 
   return (
     <section className="bg-white">
-      <div className="mx-auto w-full max-w-[1120px] px-5 py-16 sm:px-6 sm:py-20 lg:px-8 lg:py-28">
+      <div className="mx-auto w-full max-w-[1120px] px-5 pt-[calc(var(--site-header-height)+4rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+5rem)] sm:pb-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+7rem)] lg:pb-28">
         <PolicyDocument
           id="privacy"
           title="개인정보 수집·이용 동의 안내"

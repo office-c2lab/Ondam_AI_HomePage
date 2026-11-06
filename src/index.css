@@ -4,6 +4,7 @@
   --brand-primary: #075df6;
   --brand-primary-light: #168bff;
   --brand-primary-dark: #063cc8;
+  --site-header-height: 70px;
   font-family:
     Pretendard,
     Inter,
@@ -16,6 +17,18 @@
   background: #ffffff;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+}
+
+@media (min-width: 681px) {
+  :root {
+    --site-header-height: 80px;
+  }
+}
+
+@media (min-width: 981px) {
+  :root {
+    --site-header-height: 90px;
+  }
 }
 
 html {

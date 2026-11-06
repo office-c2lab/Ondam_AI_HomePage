@@ -133,14 +133,14 @@ export default function Careers() {
 
   return (
     <div className="bg-[#05070b] text-white">
-      <section className="relative isolate flex min-h-[calc(100svh-90px)] items-center overflow-hidden bg-[#020817]">
+      <section className="relative isolate flex min-h-screen items-center overflow-hidden bg-[#020817]">
         <BlueShaderBackground />
         <div
           className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#05070b] to-transparent"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex min-h-[calc(100svh-90px)] w-full max-w-[1600px] flex-col items-center justify-center px-5 py-16 text-center sm:px-6 lg:px-8 min-[1600px]:px-0">
+        <div className="relative mx-auto flex min-h-screen w-full max-w-[1600px] flex-col items-center justify-center px-5 py-24 text-center sm:px-6 lg:px-8 min-[1600px]:px-0">
           <div className="ondam-career-hero__copy max-w-4xl">
             <h1 className="text-4xl leading-[1.1] font-bold tracking-[-0.05em] sm:text-5xl lg:text-[64px]">
               Build AI we can trust.

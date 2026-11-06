@@ -5,6 +5,7 @@ import Contact from './pages/Contact.jsx';
 import Directions from './pages/Directions.jsx';
 import Faq from './pages/Faq.jsx';
 import Privacy from './pages/Privacy.jsx';
+import Team from './pages/Team.jsx';
 
 export default function App() {
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -14,15 +15,14 @@ export default function App() {
     '/location': <Directions />,
     '/faq': <Faq />,
     '/privacy': <Privacy />,
+    '/team': <Team />,
   };
 
   return (
     <div className="min-h-screen bg-white text-[#171717]">
       <Header />
 
-      <main className="min-h-[calc(100vh-90px)] pt-[70px] min-[681px]:pt-[80px] min-[981px]:pt-[90px]">
-        {pages[pathname] ?? null}
-      </main>
+      <main className="min-h-screen">{pages[pathname] ?? null}</main>
 
       <Footer />
     </div>
