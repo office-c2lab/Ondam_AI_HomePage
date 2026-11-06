@@ -78,8 +78,6 @@ export default function Header() {
           { label: '도입 문의', href: '#contact' },
           { label: '오시는 길', href: '#location' },
           { label: 'FAQ', href: '#faq' },
-          { label: '회사소식', href: '#news' },
-          { label: '기술 블로그', href: '#tech-blog' },
         ],
       },
     ],

@@ -44,8 +44,6 @@ const footerMenus = [
       ['도입 문의', '#contact'],
       ['오시는 길', '#location'],
       ['FAQ', '#faq'],
-      ['기업소식', '#news'],
-      ['기술 블로그', '#tech-blog'],
     ],
   },
 ];
