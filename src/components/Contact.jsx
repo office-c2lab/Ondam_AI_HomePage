@@ -301,6 +301,8 @@ export default function Contact() {
             <section>
               <a
                 href="/privacy"
+                target="_blank"
+                rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-[#101828] underline underline-offset-4"
               >
                 개인정보 수집 동의
@@ -325,6 +327,8 @@ export default function Contact() {
             <section>
               <a
                 href="/privacy#marketing"
+                target="_blank"
+                rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm font-bold text-[#101828] underline underline-offset-4"
               >
                 마케팅 정보 수신 동의

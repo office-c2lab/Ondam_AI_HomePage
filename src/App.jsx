@@ -3,6 +3,7 @@ import Directions from './components/Directions.jsx';
 import Faq from './components/Faq.jsx';
 import Footer from './components/Footer.jsx';
 import Header from './components/Header.jsx';
+import Privacy from './components/Privacy.jsx';
 
 export default function App() {
   const pathname = window.location.pathname.replace(/\/+$/, '') || '/';
@@ -10,6 +11,7 @@ export default function App() {
     '/contact': <Contact />,
     '/location': <Directions />,
     '/faq': <Faq />,
+    '/privacy': <Privacy />,
   };
 
   return (

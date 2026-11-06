@@ -135,7 +135,7 @@ export default function Footer() {
           <p>© 2026 ONDAM AI. All rights reserved.</p>
           <div className="flex items-center gap-5">
             <a
-              href="#privacy"
+              href="/privacy"
               className="font-semibold text-[#475467] transition hover:text-[#101828]"
             >
               개인정보처리방침
