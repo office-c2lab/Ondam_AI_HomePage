@@ -154,11 +154,10 @@ export default function Header() {
     setIndicator(current => ({ ...current, visible: false }));
   };
 
-  const moveIndicator = (event, index) => {
+  const moveIndicatorTo = (menuItem, index) => {
     const nav = navRef.current;
-    const menuItem = event.currentTarget;
 
-    if (!nav) return;
+    if (!nav || !menuItem) return;
 
     const navRect = nav.getBoundingClientRect();
     const itemRect = menuItem.getBoundingClientRect();
@@ -169,6 +168,14 @@ export default function Header() {
       visible: true,
     });
     setActiveMenuIndex(index);
+  };
+
+  const moveIndicator = (event, index) => {
+    moveIndicatorTo(event.currentTarget, index);
+  };
+
+  const moveIndicatorFromMenuGroup = (event, index) => {
+    moveIndicatorTo(event.currentTarget.querySelector('[data-menu-trigger]'), index);
   };
 
   const hasSolidBackground = !isAtTop || isDropdownOpen;
@@ -219,15 +226,27 @@ export default function Header() {
                 className={`relative flex h-full flex-col items-center transition-[padding] duration-300 ${
                   isDropdownOpen ? 'px-[30px] min-[1501px]:px-[60px]' : 'px-[30px]'
                 }`}
-                onMouseEnter={() => setActiveMenuIndex(index)}
+                onMouseEnter={event => moveIndicatorFromMenuGroup(event, index)}
+                onTransitionEnd={event => {
+                  if (
+                    index === activeMenuIndex &&
+                    (event.propertyName === 'padding-left' ||
+                      event.propertyName === 'padding-right')
+                  ) {
+                    moveIndicatorTo(
+                      event.currentTarget.querySelector('[data-menu-trigger]'),
+                      index
+                    );
+                  }
+                }}
               >
                 <a
                   href={item.href}
+                  data-menu-trigger
                   className="flex h-[90px] shrink-0 items-center whitespace-nowrap text-[18px] font-semibold transition-colors duration-300"
                   style={{
                     color: activeMenuIndex === index ? 'var(--brand-primary)' : '#1c2025',
                   }}
-                  onMouseEnter={event => moveIndicator(event, index)}
                   onFocus={event => {
                     setIsDropdownOpen(true);
                     moveIndicator(event, index);
