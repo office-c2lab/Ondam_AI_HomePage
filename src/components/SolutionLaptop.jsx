@@ -1,197 +1,97 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
-import { Canvas, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
-import { EXRLoader } from 'three/examples/jsm/loaders/EXRLoader.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const COMBINED_SHELL_NODE_NAME = 'HzLAtwpaEQrTUta';
-const CLOSED_LID_ANGLE = 1.9;
-const HINGE_Z = -10.7;
-const PORTFOLIO_CAMERA_START = [-30.52, 0.97, 37.15];
+const PORTFOLIO_CAMERA_START = [-35.7, 0.7, 41.9];
 const DISPLAY_WORLD_CENTER = [0, 8.72, -10.2];
 const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 10];
 const FOCUSED_CAMERA_MOBILE = [0, 8.72, 22];
 
-function filterGeometryTriangles(geometry, shouldInclude) {
-  const position = geometry.attributes.position;
-  const sourceIndices = geometry.index
-    ? Array.from(geometry.index.array)
-    : Array.from({ length: position.count }, (_, index) => index);
-  const filteredIndices = [];
-
-  for (let index = 0; index < sourceIndices.length; index += 3) {
-    const a = sourceIndices[index];
-    const b = sourceIndices[index + 1];
-    const c = sourceIndices[index + 2];
-    const averageY = (position.getY(a) + position.getY(b) + position.getY(c)) / 3;
-
-    if (shouldInclude(averageY)) filteredIndices.push(a, b, c);
-  }
-
-  const filteredGeometry = geometry.clone();
-  filteredGeometry.setIndex(filteredIndices);
-  filteredGeometry.computeBoundingBox();
-  filteredGeometry.computeBoundingSphere();
-  return filteredGeometry;
+function makeUnlitMaterial(material) {
+  const unlitMaterial = new THREE.MeshBasicMaterial({
+    color: material?.color ?? 0xffffff,
+    map: material?.map ?? null,
+    alphaMap: material?.alphaMap ?? null,
+    alphaTest: material?.alphaTest ?? 0,
+    opacity: material?.opacity ?? 1,
+    transparent: material?.transparent ?? false,
+    side: material?.side ?? THREE.FrontSide,
+    vertexColors: material?.vertexColors ?? false,
+  });
+  unlitMaterial.name = `${material?.name ?? 'material'}-unlit`;
+  return unlitMaterial;
 }
 
-function PortfolioEnvironment() {
-  const environment = useLoader(EXRLoader, '/interior/st_fagans_interior_1k.exr');
-  const { scene } = useThree();
-
-  useEffect(() => {
-    const previousEnvironment = scene.environment;
-    const previousBackground = scene.background;
-    const previousBackgroundBlurriness = scene.backgroundBlurriness;
-
-    environment.mapping = THREE.EquirectangularReflectionMapping;
-    scene.environment = environment;
-    scene.background = environment;
-    scene.backgroundBlurriness = 1;
-
-    return () => {
-      scene.environment = previousEnvironment;
-      scene.background = previousBackground;
-      scene.backgroundBlurriness = previousBackgroundBlurriness;
-    };
-  }, [environment, scene]);
-
-  return null;
-}
-
-function makeDashboardTexture(activeSolution) {
+function makeLogoTexture() {
   const canvas = document.createElement('canvas');
   canvas.width = 1600;
   canvas.height = 1000;
   const context = canvas.getContext('2d');
-
-  const gradient = context.createLinearGradient(0, 0, 1600, 1000);
-  gradient.addColorStop(0, '#06142e');
-  gradient.addColorStop(0.54, '#0a2455');
-  gradient.addColorStop(1, '#075df6');
-  context.fillStyle = gradient;
-  context.fillRect(0, 0, 1600, 1000);
-
-  context.fillStyle = 'rgba(255, 255, 255, 0.06)';
-  context.fillRect(0, 0, 232, 1000);
-  context.fillStyle = '#ffffff';
-  context.font = '700 46px Arial';
-  context.fillText('ONDAM AI', 54, 80);
-  context.font = '500 22px Arial';
-  ['Overview', 'Discover', 'Control', 'Manage'].forEach((label, index) => {
-    const y = 186 + index * 82;
-    if (label === activeSolution || (activeSolution.startsWith('Control') && label === 'Control')) {
-      context.fillStyle = 'rgba(61, 150, 255, 0.28)';
-      context.beginPath();
-      context.roundRect(28, y - 40, 176, 58, 15);
-      context.fill();
-    }
-    context.fillStyle = 'rgba(255,255,255,0.82)';
-    context.fillText(label, 54, y);
-  });
-
-  context.fillStyle = '#ffffff';
-  context.font = '700 58px Arial';
-  context.fillText(activeSolution, 302, 126);
-  context.fillStyle = 'rgba(217, 232, 255, 0.72)';
-  context.font = '400 25px Arial';
-  context.fillText('Enterprise AI Control Center', 304, 170);
-  context.fillStyle = 'rgba(98, 193, 255, 0.18)';
-  context.beginPath();
-  context.roundRect(1162, 92, 226, 54, 27);
-  context.fill();
-  context.fillStyle = '#8fd2ff';
-  context.font = '700 19px Arial';
-  context.fillText('ILLUSTRATIVE VIEW', 1192, 126);
-
-  const cardPositions = [302, 682, 1062];
-  cardPositions.forEach((x, index) => {
-    context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-    context.beginPath();
-    context.roundRect(x, 224, 326, 184, 24);
-    context.fill();
-    context.fillStyle = 'rgba(255,255,255,0.62)';
-    context.font = '500 21px Arial';
-    context.fillText(['Connected services', 'Policy status', 'Risk monitoring'][index], x + 30, 274);
-    context.fillStyle = '#ffffff';
-    context.font = '700 40px Arial';
-    context.fillText(['Unified', 'Protected', 'Live'][index], x + 30, 342);
-  });
-
-  context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-  context.beginPath();
-  context.roundRect(302, 452, 1086, 438, 24);
-  context.fill();
-  context.fillStyle = 'rgba(255,255,255,0.72)';
-  context.font = '600 23px Arial';
-  context.fillText('AI activity overview', 336, 504);
-
-  context.strokeStyle = 'rgba(255,255,255,0.12)';
-  context.lineWidth = 2;
-  for (let index = 0; index < 4; index += 1) {
-    const y = 582 + index * 78;
-    context.beginPath();
-    context.moveTo(336, y);
-    context.lineTo(1346, y);
-    context.stroke();
-  }
-
-  const points = [760, 708, 734, 648, 676, 584, 622, 548, 570, 512, 536];
-  context.strokeStyle = '#62c1ff';
-  context.lineWidth = 8;
-  context.lineCap = 'round';
-  context.lineJoin = 'round';
-  context.beginPath();
-  points.forEach((y, index) => {
-    const x = 356 + index * 96;
-    if (index === 0) context.moveTo(x, y);
-    else context.lineTo(x, y);
-  });
-  context.stroke();
+  context.fillStyle = '#020204';
+  context.fillRect(0, 0, canvas.width, canvas.height);
 
   const texture = new THREE.CanvasTexture(canvas);
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.flipY = true;
   texture.needsUpdate = true;
+
+  const logo = new Image();
+  logo.onload = () => {
+    const logoCanvas = document.createElement('canvas');
+    logoCanvas.width = logo.naturalWidth;
+    logoCanvas.height = logo.naturalHeight;
+    const logoContext = logoCanvas.getContext('2d');
+    logoContext.drawImage(logo, 0, 0);
+
+    const logoPixels = logoContext.getImageData(0, 0, logoCanvas.width, logoCanvas.height);
+    for (let index = 0; index < logoPixels.data.length; index += 4) {
+      const red = logoPixels.data[index];
+      const green = logoPixels.data[index + 1];
+      const blue = logoPixels.data[index + 2];
+      if (logoPixels.data[index + 3] > 0 && Math.max(red, green, blue) < 90) {
+        logoPixels.data[index] = 255;
+        logoPixels.data[index + 1] = 255;
+        logoPixels.data[index + 2] = 255;
+      }
+    }
+    logoContext.putImageData(logoPixels, 0, 0);
+
+    const logoWidth = 920;
+    const logoHeight = logoWidth * (logo.naturalHeight / logo.naturalWidth);
+    context.drawImage(
+      logoCanvas,
+      (canvas.width - logoWidth) / 2,
+      (canvas.height - logoHeight) / 2,
+      logoWidth,
+      logoHeight
+    );
+    texture.needsUpdate = true;
+  };
+  logo.src = '/ondam_logo_simbol.png';
+
   return texture;
 }
 
-function LaptopModel({ activeSolution, motionEnabled, isFocused, onFocus, onBlur }) {
+function LaptopModel({ motionEnabled, scrollProgress }) {
   const group = useRef(null);
   const cameraLookAt = useRef(new THREE.Vector3(10, 3, 0));
   const cameraDestination = useRef(new THREE.Vector3());
   const lookAtDestination = useRef(new THREE.Vector3());
   const focusProgress = useRef(0);
-  const [isOpen, setIsOpen] = useState(false);
   const gltf = useLoader(GLTFLoader, '/models/macbook.glb');
-  const texture = useMemo(() => makeDashboardTexture(activeSolution), [activeSolution]);
+  const texture = useMemo(() => makeLogoTexture(), []);
   const rig = useMemo(() => {
     const clonedScene = gltf.scene.clone(true);
-    const lidMeshes = [];
-    const combinedShell = clonedScene.getObjectByName(COMBINED_SHELL_NODE_NAME);
-
-    if (combinedShell?.isMesh) {
-      const baseGeometry = filterGeometryTriangles(combinedShell.geometry, y => y <= 2);
-      const lidGeometry = filterGeometryTriangles(combinedShell.geometry, y => y > 2);
-      combinedShell.geometry = baseGeometry;
-
-      const lidShell = new THREE.Mesh(lidGeometry, combinedShell.material);
-      lidShell.name = `${COMBINED_SHELL_NODE_NAME}-lid`;
-      lidShell.castShadow = false;
-      lidShell.receiveShadow = false;
-      combinedShell.parent.add(lidShell);
-      lidMeshes.push(lidShell);
-    }
 
     clonedScene.traverse(object => {
       if (!object.isMesh) return;
       object.castShadow = false;
       object.receiveShadow = false;
+      object.material = Array.isArray(object.material)
+        ? object.material.map(makeUnlitMaterial)
+        : makeUnlitMaterial(object.material);
 
-      if (object.name !== COMBINED_SHELL_NODE_NAME && object.name !== `${COMBINED_SHELL_NODE_NAME}-lid`) {
-        object.geometry.computeBoundingBox();
-        if (object.geometry.boundingBox.max.y > 5) lidMeshes.push(object);
-      }
     });
 
     const trackingNode = clonedScene.getObjectByName('tracking_node_placeholder');
@@ -204,48 +104,22 @@ function LaptopModel({ activeSolution, motionEnabled, isFocused, onFocus, onBlur
     display.rotation.x = -0.33;
     display.renderOrder = 10;
     trackingNode.add(display);
-    lidMeshes.push(display);
 
-    const lidPivot = new THREE.Group();
-    lidPivot.name = 'laptop-lid-hinge';
-    lidPivot.position.set(0, 0, HINGE_Z);
-    trackingNode.add(lidPivot);
-    clonedScene.updateMatrixWorld(true);
-    lidMeshes.forEach(mesh => lidPivot.attach(mesh));
-    lidPivot.rotation.x = CLOSED_LID_ANGLE;
-
-    return { scene: clonedScene, lidPivot };
+    return { scene: clonedScene };
   }, [gltf.scene, texture]);
 
   useEffect(() => () => texture.dispose(), [texture]);
-  useEffect(() => {
-    if (!motionEnabled) {
-      setIsOpen(true);
-      return undefined;
-    }
-
-    setIsOpen(false);
-    const openTimer = window.setTimeout(() => setIsOpen(true), 320);
-    return () => window.clearTimeout(openTimer);
-  }, [motionEnabled, rig]);
 
   useFrame((state, delta) => {
-    const targetAngle = isOpen ? 0 : CLOSED_LID_ANGLE;
-    rig.lidPivot.rotation.x = motionEnabled
-      ? THREE.MathUtils.damp(rig.lidPivot.rotation.x, targetAngle, 4.8, delta)
-      : targetAngle;
-
     focusProgress.current = motionEnabled
-      ? THREE.MathUtils.damp(focusProgress.current, isFocused ? 1 : 0, 3, delta)
-      : isFocused
-        ? 1
-        : 0;
+      ? THREE.MathUtils.damp(focusProgress.current, scrollProgress.current, 5, delta)
+      : scrollProgress.current;
     const progress = THREE.MathUtils.smoothstep(focusProgress.current, 0, 1);
     const isMobile = state.size.width < 640;
     const focusedCamera = isMobile ? FOCUSED_CAMERA_MOBILE : FOCUSED_CAMERA_DESKTOP;
     const cameraPosition = cameraDestination.current.set(
       THREE.MathUtils.lerp(
-        isMobile ? -22 : PORTFOLIO_CAMERA_START[0],
+        isMobile ? -25 : PORTFOLIO_CAMERA_START[0],
         focusedCamera[0],
         progress
       ),
@@ -255,7 +129,7 @@ function LaptopModel({ activeSolution, motionEnabled, isFocused, onFocus, onBlur
         progress
       ),
       THREE.MathUtils.lerp(
-        isMobile ? 42 : PORTFOLIO_CAMERA_START[2],
+        isMobile ? 48 : PORTFOLIO_CAMERA_START[2],
         focusedCamera[2],
         progress
       )
@@ -295,32 +169,18 @@ function LaptopModel({ activeSolution, motionEnabled, isFocused, onFocus, onBlur
   });
 
   return (
-    <group
-      ref={group}
-      rotation={[0.335, 0, 0]}
-      position={[0, -5, 0]}
-      scale={100}
-      onPointerDown={event => {
-        event.stopPropagation();
-        setIsOpen(true);
-        onFocus();
-      }}
-      onPointerMissed={onBlur}
-      onPointerOver={() => {
-        document.body.style.cursor = 'pointer';
-      }}
-      onPointerOut={() => {
-        document.body.style.cursor = '';
-      }}
-    >
+    <group ref={group} rotation={[0.335, 0, 0]} position={[0, -5, 0]} scale={100}>
       <primitive object={rig.scene} />
     </group>
   );
 }
 
-export default function SolutionLaptop({ activeSolution }) {
+export default function SolutionLaptop() {
+  const section = useRef(null);
+  const groundShadow = useRef(null);
+  const message = useRef(null);
+  const scrollProgress = useRef(0);
   const [motionEnabled, setMotionEnabled] = useState(true);
-  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -331,39 +191,102 @@ export default function SolutionLaptop({ activeSolution }) {
   }, []);
 
   useEffect(() => {
+    let animationFrame = 0;
+
+    const updateScrollProgress = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => {
+        if (!section.current) return;
+        const bounds = section.current.getBoundingClientRect();
+        const scrollDistance = section.current.offsetHeight - window.innerHeight;
+        const progress = THREE.MathUtils.clamp(
+          scrollDistance > 0 ? -bounds.top / scrollDistance : 0,
+          0,
+          1
+        );
+        scrollProgress.current = progress;
+
+        if (groundShadow.current) {
+          groundShadow.current.style.opacity = String(Math.max(0, 0.28 * (1 - progress * 2.2)));
+          groundShadow.current.style.transform = `translateX(-50%) scale(${1 - progress * 0.12})`;
+        }
+
+        if (message.current) {
+          message.current.style.opacity = String(Math.max(0, 1 - progress * 2.4));
+          message.current.style.transform = `translateY(-50%) translateX(${progress * 44}px)`;
+        }
+      });
+    };
+
+    updateScrollProgress();
+    window.addEventListener('scroll', updateScrollProgress, { passive: true });
+    window.addEventListener('resize', updateScrollProgress);
     return () => {
-      document.body.style.cursor = '';
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('scroll', updateScrollProgress);
+      window.removeEventListener('resize', updateScrollProgress);
     };
   }, []);
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
-      <p
-        className={`pointer-events-none absolute top-1/2 right-[23%] z-10 hidden w-[250px] -translate-y-1/2 font-sans text-xl font-normal text-[#171717] transition-[opacity,transform] duration-500 sm:block ${
-          isFocused ? 'translate-x-7 opacity-0' : 'translate-x-0 opacity-100'
-        }`}
-      >
-        Click to use the Macbook
-      </p>
-      <Canvas
-        aria-hidden="true"
-        camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
-        dpr={[1, 1.65]}
-        gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-      >
-        <ambientLight intensity={0.5} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-        <Suspense fallback={null}>
-          <PortfolioEnvironment />
-          <LaptopModel
-            activeSolution={activeSolution}
-            motionEnabled={motionEnabled}
-            isFocused={isFocused}
-            onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+    <div ref={section} className="relative h-[200vh] w-full">
+      <div className="sticky top-0 h-screen w-full overflow-hidden">
+        <div aria-hidden="true" className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_58%_at_50%_72%,rgba(37,99,235,0.16)_0%,rgba(96,165,250,0.07)_40%,transparent_72%)]" />
+          <div
+            className="absolute -bottom-[16%] -left-[10%] h-[58%] w-[120%] origin-bottom opacity-40"
+            style={{
+              backgroundImage:
+                'linear-gradient(rgba(59, 130, 246, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.14) 1px, transparent 1px)',
+              backgroundSize: '64px 42px',
+              maskImage: 'linear-gradient(to bottom, transparent 0%, black 48%, black 100%)',
+              WebkitMaskImage:
+                'linear-gradient(to bottom, transparent 0%, black 48%, black 100%)',
+              transform: 'perspective(720px) rotateX(56deg) scale(1.18)',
+            }}
           />
-        </Suspense>
-      </Canvas>
+        </div>
+        <div
+          ref={groundShadow}
+          aria-hidden="true"
+          className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
+          style={{ opacity: 0.28, transform: 'translateX(-50%)' }}
+        />
+        <div
+          ref={message}
+          className="pointer-events-none absolute top-1/2 right-[8%] z-20 hidden w-[34%] max-w-[520px] -translate-y-1/2 sm:block"
+        >
+          <p className="mb-5 text-sm font-semibold tracking-[0.2em] text-blue-600">
+            ENTERPRISE AI CONTROL CENTER
+          </p>
+          <h1 className="text-[clamp(2.3rem,3.7vw,4.8rem)] leading-[1.08] font-semibold tracking-[-0.055em] text-slate-950">
+            기업의 AI를
+            <br />
+            발견하고, 통제하고,
+            <br />
+            관리합니다.
+          </h1>
+          <p className="mt-7 max-w-[470px] text-[clamp(1rem,1.15vw,1.25rem)] leading-8 text-slate-600">
+            Discover부터 Control, Manage까지.
+            <br />
+            신뢰할 수 있는 AI 활용 환경을 만듭니다.
+          </p>
+        </div>
+        <Canvas
+          aria-hidden="true"
+          className="relative z-10"
+          camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
+          dpr={[1, 1.65]}
+          gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+        >
+          <Suspense fallback={null}>
+            <LaptopModel
+              motionEnabled={motionEnabled}
+              scrollProgress={scrollProgress}
+            />
+          </Suspense>
+        </Canvas>
+      </div>
     </div>
   );
 }

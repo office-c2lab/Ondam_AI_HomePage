@@ -15,11 +15,11 @@ function Container({ children, className = '' }) {
 
 function HeaderLogo({ inverse = false }) {
   return (
-    <span className="relative block h-[27px] w-[145px] overflow-hidden min-[981px]:h-8 min-[981px]:w-[173px]">
+    <span className="block h-[27px] w-[151px] min-[981px]:h-8 min-[981px]:w-[179px]">
       <img
-        src="/ondam_logo.png"
+        src="/ondam_logo_simbol.png"
         alt="ONDAM AI"
-        className={`absolute top-[-17px] left-[-19px] h-auto w-[180px] max-w-none object-contain min-[981px]:top-[-21px] min-[981px]:left-[-22px] min-[981px]:w-[215px] ${inverse ? 'brightness-0 invert' : ''}`}
+        className={`h-full w-full object-contain ${inverse ? 'brightness-0 invert' : ''}`}
       />
     </span>
   );
