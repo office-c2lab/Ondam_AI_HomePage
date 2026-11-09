@@ -82,6 +82,17 @@ const values = [
   },
 ];
 
+const talentTraits = [
+  { title: '전문성', symbol: '🏅' },
+  { title: '창의성', symbol: '🎨' },
+  { title: '문제해결능력', symbol: '🧩' },
+  { title: '윤리의식', symbol: '🖊️' },
+  { title: '도전정신', symbol: '🎲' },
+  { title: '소통능력', symbol: '🔊' },
+  { title: '팀워크', symbol: '⚽' },
+  { title: '책임의식', symbol: '📋' },
+];
+
 const environments = [
   {
     icon: Laptop2,
@@ -132,11 +143,11 @@ export default function Careers() {
   }, []);
 
   return (
-    <div className="bg-[#05070b] text-white">
+    <div className="bg-black text-white">
       <section className="relative isolate flex min-h-screen items-center overflow-hidden bg-[#020817]">
         <BlueShaderBackground />
         <div
-          className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#05070b] to-transparent"
+          className="absolute inset-x-0 bottom-0 h-64 bg-gradient-to-t from-black via-black/55 to-transparent"
           aria-hidden="true"
         />
 
@@ -165,46 +176,77 @@ export default function Careers() {
         </div>
       </section>
 
-      <section className="px-5 py-24 sm:px-6 sm:py-32 lg:px-8" aria-labelledby="career-about">
-        <div className="mx-auto w-full max-w-[1600px] min-[1600px]:px-0">
-          <div className="grid gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:items-end lg:gap-24">
-            <div>
-              <p className="text-sm font-bold tracking-[0.14em] text-[#74a8ff]">ABOUT US</p>
-              <h2
-                id="career-about"
-                className="mt-4 text-3xl leading-[1.2] font-bold tracking-[-0.04em] sm:text-4xl lg:text-[48px]"
-              >
-                사람과 AI가 함께 일하는
-                <br /> 더 나은 방식을 설계합니다.
-              </h2>
-            </div>
-            <p className="text-base leading-8 text-white/60 sm:text-lg">
-              ONDAM AI는 기업이 다양한 AI 서비스와 에이전트를 발견하고, 사용을 통제하며, 운영 전반을
-              관리할 수 있도록 돕는 엔터프라이즈 AI 플랫폼을 만듭니다. 빠른 기술 변화 속에서도
-              신뢰할 수 있는 AI 활용 환경을 만드는 것이 우리의 목표입니다.
+      <section
+        className="relative z-10 -mt-px bg-black px-5 pt-12 pb-0 sm:px-6 sm:pt-14 lg:px-8 lg:pt-16"
+        aria-labelledby="career-about"
+      >
+        <div className="mx-auto w-full max-w-[1200px] pb-20 sm:pb-24 lg:pb-20">
+          <p className="text-base leading-none font-bold tracking-[-0.02em] text-[#168bff] sm:text-lg">
+            회사소개
+          </p>
+          <h2
+            id="career-about"
+            className="mt-5 text-[32px] leading-tight font-bold tracking-[-0.05em] text-white sm:text-[38px]"
+          >
+            온담AI
+          </h2>
+
+          <div className="mt-10 max-w-[680px] space-y-6 text-[15px] leading-[1.65] font-semibold tracking-[-0.025em] text-white/90 sm:text-base">
+            <p>
+              온담AI는 기업이 다양한 AI 서비스와 에이전트를 발견하고, 사용을 통제하며,
+              <br className="hidden sm:block" /> 운영 전반을 관리할 수 있도록 돕는 엔터프라이즈 AI
+              플랫폼을 만듭니다.
+            </p>
+            <p>
+              AI 서비스 탐색부터 Internal·External AI 사용 통제, AI App Store와 에이전트 운영까지
+              <br className="hidden sm:block" /> 기업이 신뢰할 수 있는 AI 활용 환경을 구축하도록
+              지원합니다.
             </p>
           </div>
+        </div>
+      </section>
 
-          <div className="mt-16 grid gap-5 md:grid-cols-3">
-            {[
-              ['DISCOVER', '업무에 맞는 AI 서비스와 에이전트를 발견합니다.'],
-              ['CONTROL', 'Internal·External AI 사용을 정책에 맞게 통제합니다.'],
-              ['MANAGE', 'AI App Store와 에이전트 운영을 한곳에서 관리합니다.'],
-            ].map(([title, description]) => (
+      <section
+        id="talent"
+        className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8"
+        aria-labelledby="career-talent"
+      >
+        <div className="mx-auto w-full max-w-[1200px]">
+          <div className="text-center">
+            <p className="text-base leading-none font-bold tracking-[-0.02em] text-[#168bff] sm:text-lg">
+              인재
+            </p>
+            <h2
+              id="career-talent"
+              className="mt-5 text-[32px] leading-tight font-bold tracking-[-0.05em] text-white sm:text-[38px]"
+            >
+              바라는 인재상
+            </h2>
+          </div>
+
+          <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {talentTraits.map(({ title, symbol }) => (
               <article
                 key={title}
-                className="min-h-56 rounded-2xl border border-white/10 bg-white/[0.045] p-7 transition hover:-translate-y-1 hover:border-[#5d98ff]/60 hover:bg-white/[0.07] sm:p-8"
+                className="group flex min-h-[230px] flex-col items-center justify-center rounded-2xl bg-[#181818] px-5 py-10 text-center transition duration-300 hover:-translate-y-1 hover:bg-[#343434] sm:min-h-[250px]"
               >
-                <span className="text-sm font-bold tracking-[0.13em] text-[#74a8ff]">{title}</span>
-                <p className="mt-16 text-xl leading-8 font-semibold text-white/90">{description}</p>
+                <h3 className="text-lg font-bold tracking-[-0.03em] text-white/90 sm:text-xl">
+                  {title}
+                </h3>
+                <span
+                  className="mt-7 text-[58px] leading-none transition duration-300 group-hover:scale-110 sm:text-[64px]"
+                  aria-hidden="true"
+                >
+                  {symbol}
+                </span>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="roles" className="scroll-mt-28 bg-[#0a0d13] px-5 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <div className="mx-auto w-full max-w-[1600px] min-[1600px]:px-0">
+      <section id="roles" className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8">
+        <div className="mx-auto w-full max-w-[1200px]">
           <SectionHeading
             label="TEAMS"
             title="전문성이 제품으로 이어지는 팀"
@@ -238,8 +280,8 @@ export default function Careers() {
         </div>
       </section>
 
-      <section id="talent" className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <div className="mx-auto w-full max-w-[1600px] min-[1600px]:px-0">
+      <section id="values" className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8">
+        <div className="mx-auto w-full max-w-[1200px]">
           <SectionHeading
             label="OUR VALUES"
             title="우리가 함께 일하는 방식"
@@ -261,44 +303,37 @@ export default function Careers() {
 
       <section
         id="benefits"
-        className="scroll-mt-28 bg-[#f4f7fb] px-5 py-24 text-[#101828] sm:px-6 sm:py-32 lg:px-8"
+        className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8"
       >
-        <div className="mx-auto w-full max-w-[1600px] min-[1600px]:px-0">
-          <div className="max-w-3xl">
-            <p className="text-sm font-bold tracking-[0.14em] text-[var(--brand-primary)]">
-              WORK ENVIRONMENT
-            </p>
-            <h2 className="mt-4 text-3xl leading-[1.2] font-bold tracking-[-0.04em] sm:text-4xl lg:text-[48px]">
-              더 좋은 성과를 위한 업무 환경
-            </h2>
-            <p className="mt-5 text-base leading-8 text-[#667085] sm:text-lg">
-              제도보다 중요한 것은 일하는 경험입니다. ONDAM AI는 몰입과 성장, 지속 가능한 협업을
-              지원하는 환경을 만들어갑니다.
-            </p>
-          </div>
+        <div className="mx-auto w-full max-w-[1200px]">
+          <SectionHeading
+            label="WORK ENVIRONMENT"
+            title="더 좋은 성과를 위한 업무 환경"
+            description="제도보다 중요한 것은 일하는 경험입니다. ONDAM AI는 몰입과 성장, 지속 가능한 협업을 지원하는 환경을 만들어갑니다."
+          />
 
           <div className="mt-16 grid gap-5 sm:grid-cols-2">
             {environments.map(({ icon, title, description }) => (
               <article
                 key={title}
-                className="rounded-2xl border border-[#dfe5ee] bg-white p-7 sm:p-9"
+                className="rounded-2xl border border-white/10 bg-white/[0.045] p-7 sm:p-9"
               >
-                <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#edf4ff] text-[var(--brand-primary)]">
+                <div className="grid h-12 w-12 place-items-center rounded-xl bg-[#075df6]/18 text-[#6fa4ff]">
                   {createElement(icon, { className: 'h-6 w-6', strokeWidth: 1.8 })}
                 </div>
                 <h3 className="mt-7 text-xl font-bold sm:text-2xl">{title}</h3>
-                <p className="mt-4 text-[15px] leading-7 text-[#667085]">{description}</p>
+                <p className="mt-4 text-[15px] leading-7 text-white/55">{description}</p>
               </article>
             ))}
           </div>
-          <p className="mt-6 text-sm leading-6 text-[#667085]">
+          <p className="mt-6 text-sm leading-6 text-white/45">
             구체적인 근무 조건과 복리후생은 채용 포지션별 공고에서 안내합니다.
           </p>
         </div>
       </section>
 
       <section id="hiring-process" className="scroll-mt-28 px-5 py-24 sm:px-6 sm:py-32 lg:px-8">
-        <div className="mx-auto w-full max-w-[1600px] min-[1600px]:px-0">
+        <div className="mx-auto w-full max-w-[1200px]">
           <SectionHeading
             label="HIRING PROCESS"
             title="ONDAM AI 합류 여정"
@@ -325,7 +360,7 @@ export default function Careers() {
       </section>
 
       <section id="openings" className="scroll-mt-28 px-5 pb-24 sm:px-6 sm:pb-32 lg:px-8">
-        <div className="relative mx-auto w-full max-w-[1600px] overflow-hidden rounded-[28px] bg-[var(--brand-primary)] px-7 py-16 sm:px-12 sm:py-20 lg:px-20 min-[1600px]:max-w-[1600px]">
+        <div className="relative mx-auto w-full max-w-[1200px] overflow-hidden rounded-[28px] bg-[var(--brand-primary)] px-7 py-16 sm:px-12 sm:py-20 lg:px-20">
           <div
             className="absolute inset-0 opacity-35 [background-image:radial-gradient(circle_at_80%_20%,#73b2ff_0%,transparent_28%),repeating-linear-gradient(120deg,transparent_0px,transparent_32px,rgba(255,255,255,0.18)_33px,rgba(255,255,255,0.18)_35px,transparent_36px)]"
             aria-hidden="true"
@@ -352,8 +387,8 @@ export default function Careers() {
         </div>
       </section>
 
-      <section className="border-t border-white/10 px-5 py-12 sm:px-6 lg:px-8">
-        <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between min-[1600px]:px-0">
+      <section className="px-5 py-12 sm:px-6 lg:px-8">
+        <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3 text-sm leading-6 text-white/55">
             <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-[#6fa4ff]" strokeWidth={1.8} />
             <span>서울특별시 구로구 디지털로31길 20, 에이스테크노타워5차 310호</span>
