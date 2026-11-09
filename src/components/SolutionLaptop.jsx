@@ -1,6 +1,7 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
+import { Html } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
+import { motion as Motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
@@ -21,11 +22,9 @@ export function SolutionMenu({ compact = false }) {
 
   return (
     <div>
-      <motion.h2
+      <Motion.h2
         className={`leading-[1.12] font-semibold tracking-[-0.055em] text-slate-950 ${
-          compact
-            ? 'text-[clamp(2rem,6vw,3rem)]'
-            : 'text-[clamp(2rem,2.5vw,3rem)]'
+          compact ? 'text-[clamp(2rem,6vw,3rem)]' : 'text-[clamp(2rem,2.5vw,3rem)]'
         }`}
         initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -33,17 +32,15 @@ export function SolutionMenu({ compact = false }) {
         transition={{ duration: 0.64, ease: [0.22, 1, 0.36, 1] }}
       >
         솔루션 &amp; 서비스
-      </motion.h2>
+      </Motion.h2>
 
       <nav className="mt-8" aria-label="솔루션 바로가기">
         {solutionLinks.map(([label, href], index) => (
-          <motion.a
+          <Motion.a
             key={href}
             href={href}
             className={`group flex items-center justify-between py-[18px] text-left font-semibold tracking-[-0.025em] transition-[color,padding] duration-300 hover:pl-2 hover:text-[#0b5cff] ${
-              compact
-                ? 'text-[clamp(0.95rem,2.4vw,1.1rem)]'
-                : 'text-[clamp(0.95rem,0.95vw,1.1rem)]'
+              compact ? 'text-[clamp(0.95rem,2.4vw,1.1rem)]' : 'text-[clamp(0.95rem,0.95vw,1.1rem)]'
             } text-slate-700`}
             initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -57,7 +54,7 @@ export function SolutionMenu({ compact = false }) {
             >
               →
             </span>
-          </motion.a>
+          </Motion.a>
         ))}
       </nav>
     </div>
@@ -70,13 +67,13 @@ function AnimatedSolutionLink({ label, href, index, scrollProgress, motionEnable
   const x = useTransform(scrollProgress, [exitStart, exitStart + 0.08], [0, 42]);
 
   return (
-    <motion.div
+    <Motion.div
       initial={motionEnabled ? { opacity: 0, y: 18 } : false}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.6 }}
       transition={{ duration: 0.58, delay: 0.18 + index * 0.11, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.a
+      <Motion.a
         href={href}
         className="group flex items-center justify-between py-[18px] text-left text-[clamp(0.95rem,0.95vw,1.1rem)] font-semibold tracking-[-0.025em] text-slate-700 transition-[color,padding] duration-300 hover:pl-2 hover:text-[#0b5cff]"
         style={{ opacity, x: motionEnabled ? x : 0 }}
@@ -88,8 +85,8 @@ function AnimatedSolutionLink({ label, href, index, scrollProgress, motionEnable
         >
           →
         </span>
-      </motion.a>
-    </motion.div>
+      </Motion.a>
+    </Motion.div>
   );
 }
 
@@ -99,19 +96,19 @@ function DesktopSolutionMenu({ scrollProgress, motionEnabled }) {
 
   return (
     <div>
-      <motion.div
+      <Motion.div
         initial={motionEnabled ? { opacity: 0, y: 22 } : false}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.6 }}
         transition={{ duration: 0.68, ease: [0.22, 1, 0.36, 1] }}
       >
-        <motion.h2
+        <Motion.h2
           className="text-[clamp(2rem,2.5vw,3rem)] leading-[1.12] font-semibold tracking-[-0.055em] text-slate-950"
           style={{ opacity: titleOpacity, x: motionEnabled ? titleX : 0 }}
         >
           솔루션 &amp; 서비스
-        </motion.h2>
-      </motion.div>
+        </Motion.h2>
+      </Motion.div>
 
       <nav className="mt-8" aria-label="솔루션 바로가기">
         {solutionLinks.map(([label, href], index) => (
@@ -194,8 +191,50 @@ function makeLogoTexture() {
   return texture;
 }
 
+function EmbeddedOndamScreen({ screenRef }) {
+  return (
+    <Html
+      transform
+      pointerEvents="none"
+      distanceFactor={6}
+      rotation={[-0.33, 0, 0]}
+      position={[0, 9.62, -14.08]}
+      style={{ pointerEvents: 'none' }}
+    >
+      <div
+        ref={screenRef}
+        inert={true}
+        aria-hidden="true"
+        className="h-[1195px] w-[1900px] overflow-hidden bg-white"
+        style={{
+          opacity: 0,
+          pointerEvents: 'none',
+          userSelect: 'none',
+          transition: 'opacity 120ms linear',
+        }}
+      >
+        <iframe
+          src="/embedded/ondam-screen"
+          title=""
+          tabIndex={-1}
+          width="1440"
+          height="906"
+          className="block border-0"
+          style={{
+            pointerEvents: 'none',
+            transform: 'scale(1.31945)',
+            transformOrigin: 'top left',
+          }}
+        />
+      </div>
+    </Html>
+  );
+}
+
 function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
   const group = useRef(null);
+  const screen = useRef(null);
+  const logoMaterial = useRef(null);
   const cameraLookAt = useRef(new THREE.Vector3(...PORTFOLIO_LOOK_AT_START));
   const cameraDestination = useRef(new THREE.Vector3());
   const lookAtDestination = useRef(new THREE.Vector3());
@@ -213,24 +252,32 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
       object.material = Array.isArray(object.material)
         ? object.material.map(makeUnlitMaterial)
         : makeUnlitMaterial(object.material);
-
     });
 
     const trackingNode = clonedScene.getObjectByName('tracking_node_placeholder');
-    const display = new THREE.Mesh(
-      new THREE.PlaneGeometry(28.1, 16.7),
-      new THREE.MeshBasicMaterial({ map: texture, toneMapped: false })
-    );
+    const logoMaterial = new THREE.MeshBasicMaterial({
+      map: texture,
+      toneMapped: false,
+      transparent: true,
+      depthWrite: false,
+    });
+    const display = new THREE.Mesh(new THREE.PlaneGeometry(28.1, 16.7), logoMaterial);
     display.name = 'ondam-dashboard-display';
     display.position.set(0, 9.62, -14.12);
     display.rotation.x = -0.33;
     display.renderOrder = 10;
     trackingNode.add(display);
 
-    return { scene: clonedScene };
+    return { scene: clonedScene, logoMaterial };
   }, [gltf.scene, texture]);
 
   useEffect(() => () => texture.dispose(), [texture]);
+  useEffect(() => {
+    logoMaterial.current = rig.logoMaterial;
+    return () => {
+      logoMaterial.current = null;
+    };
+  }, [rig]);
 
   useFrame((state, delta) => {
     entryMotion.current = motionEnabled
@@ -246,11 +293,7 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
         THREE.MathUtils.lerp(-13.5, -5, entrance),
         THREE.MathUtils.lerp(5, 0, entrance)
       );
-      group.current.rotation.set(
-        THREE.MathUtils.lerp(0.38, 0.335, entrance),
-        0,
-        0
-      );
+      group.current.rotation.set(THREE.MathUtils.lerp(0.38, 0.335, entrance), 0, 0);
       group.current.scale.setScalar(THREE.MathUtils.lerp(70, 100, entrance));
     }
 
@@ -258,24 +301,19 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
       ? THREE.MathUtils.damp(focusProgress.current, scrollProgress.current, 5, delta)
       : scrollProgress.current;
     const progress = THREE.MathUtils.smoothstep(focusProgress.current, 0, 1);
+    const screenReveal = THREE.MathUtils.smoothstep(focusProgress.current, 0.88, 0.99);
+    if (logoMaterial.current) {
+      logoMaterial.current.opacity = 1 - screenReveal;
+    }
+    if (screen.current) {
+      screen.current.style.opacity = String(screenReveal);
+    }
     const isMobile = state.size.width < 640;
     const focusedCamera = isMobile ? FOCUSED_CAMERA_MOBILE : FOCUSED_CAMERA_DESKTOP;
     const cameraPosition = cameraDestination.current.set(
-      THREE.MathUtils.lerp(
-        isMobile ? -22 : PORTFOLIO_CAMERA_START[0],
-        focusedCamera[0],
-        progress
-      ),
-      THREE.MathUtils.lerp(
-        isMobile ? 1 : PORTFOLIO_CAMERA_START[1],
-        focusedCamera[1],
-        progress
-      ),
-      THREE.MathUtils.lerp(
-        isMobile ? 42 : PORTFOLIO_CAMERA_START[2],
-        focusedCamera[2],
-        progress
-      )
+      THREE.MathUtils.lerp(isMobile ? -22 : PORTFOLIO_CAMERA_START[0], focusedCamera[0], progress),
+      THREE.MathUtils.lerp(isMobile ? 1 : PORTFOLIO_CAMERA_START[1], focusedCamera[1], progress),
+      THREE.MathUtils.lerp(isMobile ? 42 : PORTFOLIO_CAMERA_START[2], focusedCamera[2], progress)
     );
     const lookAtPosition = lookAtDestination.current.set(
       THREE.MathUtils.lerp(
@@ -318,6 +356,9 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
   return (
     <group ref={group} rotation={[0.38, 0, 0]} position={[0, -13.5, 5]} scale={70}>
       <primitive object={rig.scene} />
+      <group scale={0.01}>
+        <EmbeddedOndamScreen screenRef={screen} />
+      </group>
     </group>
   );
 }
@@ -332,9 +373,7 @@ export default function SolutionLaptop() {
     target: section,
     offset: ['start start', 'end end'],
   });
-  const menuPointerEvents = useTransform(scrollYProgress, value =>
-    value > 0.4 ? 'none' : 'auto'
-  );
+  const menuPointerEvents = useTransform(scrollYProgress, value => (value > 0.4 ? 'none' : 'auto'));
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -372,7 +411,6 @@ export default function SolutionLaptop() {
           );
           groundShadow.current.style.transform = `translateX(-50%) scale(${(0.58 + entrance * 0.42) * (1 - progress * 0.12)})`;
         }
-
       });
     };
 
@@ -398,8 +436,7 @@ export default function SolutionLaptop() {
                 'linear-gradient(rgba(59, 130, 246, 0.14) 1px, transparent 1px), linear-gradient(90deg, rgba(59, 130, 246, 0.14) 1px, transparent 1px)',
               backgroundSize: '64px 42px',
               maskImage: 'linear-gradient(to bottom, transparent 0%, black 48%, black 100%)',
-              WebkitMaskImage:
-                'linear-gradient(to bottom, transparent 0%, black 48%, black 100%)',
+              WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, black 48%, black 100%)',
               transform: 'perspective(720px) rotateX(56deg) scale(1.18)',
             }}
           />
@@ -426,16 +463,13 @@ export default function SolutionLaptop() {
           </Suspense>
         </Canvas>
 
-        <motion.aside
+        <Motion.aside
           aria-label="ONDAM AI 솔루션"
           className="absolute top-1/2 right-8 z-20 hidden w-[clamp(20rem,28vw,30rem)] -translate-y-1/2 xl:block min-[1600px]:right-[calc((100vw-1600px)/2)]"
           style={{ pointerEvents: menuPointerEvents }}
         >
-          <DesktopSolutionMenu
-            scrollProgress={scrollYProgress}
-            motionEnabled={motionEnabled}
-          />
-        </motion.aside>
+          <DesktopSolutionMenu scrollProgress={scrollYProgress} motionEnabled={motionEnabled} />
+        </Motion.aside>
       </div>
     </div>
   );
