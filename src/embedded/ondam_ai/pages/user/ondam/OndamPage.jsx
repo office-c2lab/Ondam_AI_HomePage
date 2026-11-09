@@ -253,8 +253,8 @@ export default function OndamPage() {
   const demoAnswerLength = Math.round(demoAnswer.length * demoAnswerProgress);
   const demoCreditCost = Math.round(640 * demoAnswerProgress);
   const demoUser = {
-    name: 'rex307',
-    email: 'rex307@ondam.ai',
+    name: '김온담',
+    email: 'ondam@ai.com',
     plan: 'Plus',
     remainingCredits: 1000000 - demoCreditCost,
     totalCredits: 1000000,
