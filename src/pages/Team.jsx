@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ArrowRight, X } from 'lucide-react';
+import { AnimatePresence, motion, MotionConfig } from 'motion/react';
+
+const motionEase = [0.22, 1, 0.36, 1];
 
 const leaders = [
   {
@@ -71,13 +74,19 @@ const leaders = [
   },
 ];
 
-function LeaderCard({ leader, onSelect }) {
+function LeaderCard({ leader, index, onSelect }) {
   return (
-    <button
+    <motion.button
       type="button"
       className="group min-w-0 appearance-none border-0 bg-transparent p-0 text-left"
       onClick={() => onSelect(leader)}
       aria-label={`${leader.name} ${leader.role} 상세 정보 보기`}
+      initial={{ opacity: 0, y: 34 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.18 }}
+      whileHover={{ y: -7 }}
+      whileTap={{ scale: 0.985 }}
+      transition={{ duration: 0.68, delay: index * 0.07, ease: motionEase }}
     >
       <div
         className="relative aspect-[0.76] overflow-hidden rounded-[28px] bg-[#eef0f3] transition-shadow duration-300 group-hover:shadow-[0_18px_40px_rgba(15,23,42,0.10)] sm:rounded-[32px]"
@@ -105,7 +114,7 @@ function LeaderCard({ leader, onSelect }) {
           {leader.description}
         </p>
       </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -148,17 +157,25 @@ function LeaderModal({ leader, onClose }) {
   if (!leader) return null;
 
   return (
-    <div
+    <motion.div
       className="fixed inset-0 z-[120] flex justify-end bg-[#11151b]/55 backdrop-blur-[2px]"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.28, ease: motionEase }}
       onMouseDown={event => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
-      <div
-        className="team-detail-drawer relative h-full w-full max-w-[680px] overflow-hidden bg-white shadow-[-24px_0_70px_rgba(15,23,42,0.18)] sm:rounded-l-[40px]"
+      <motion.div
+        className="relative h-full w-full max-w-[680px] overflow-hidden bg-white shadow-[-24px_0_70px_rgba(15,23,42,0.18)] sm:rounded-l-[40px]"
         role="dialog"
         aria-modal="true"
         aria-labelledby="leader-modal-title"
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 320, damping: 34, mass: 0.9 }}
       >
         <button
           ref={closeButtonRef}
@@ -181,13 +198,21 @@ function LeaderModal({ leader, onClose }) {
             );
           }}
         >
-          <div
+          <motion.div
             className="aspect-square w-[72%] max-w-[360px] rounded-[28px] bg-[#eef0f3] sm:rounded-[34px]"
             role="img"
             aria-label={`${leader.name} 프로필 사진 준비 중`}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, delay: 0.12, ease: motionEase }}
           />
 
-          <div className="mt-10 sm:mt-12">
+          <motion.div
+            className="mt-10 sm:mt-12"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.18, ease: motionEase }}
+          >
           <h2
             id="leader-modal-title"
             className="text-[30px] leading-tight font-bold tracking-[-0.05em] text-[#202328] sm:text-[36px]"
@@ -241,7 +266,7 @@ function LeaderModal({ leader, onClose }) {
               ))}
             </ul>
           </section>
-          </div>
+          </motion.div>
         </div>
 
         <div
@@ -250,8 +275,8 @@ function LeaderModal({ leader, onClose }) {
           }`}
           aria-hidden="true"
         />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }
 
