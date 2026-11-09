@@ -3,10 +3,11 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
-const PORTFOLIO_CAMERA_START = [-35.7, 0.7, 41.9];
+const PORTFOLIO_CAMERA_START = [-30.52, 0.97, 37.15];
+const PORTFOLIO_LOOK_AT_START = [14, 3, 0];
 const DISPLAY_WORLD_CENTER = [0, 8.72, -10.2];
-const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 10];
-const FOCUSED_CAMERA_MOBILE = [0, 8.72, 22];
+const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 14];
+const FOCUSED_CAMERA_MOBILE = [0, 8.72, 26];
 
 function makeUnlitMaterial(material) {
   const unlitMaterial = new THREE.MeshBasicMaterial({
@@ -75,7 +76,7 @@ function makeLogoTexture() {
 
 function LaptopModel({ motionEnabled, scrollProgress }) {
   const group = useRef(null);
-  const cameraLookAt = useRef(new THREE.Vector3(10, 3, 0));
+  const cameraLookAt = useRef(new THREE.Vector3(...PORTFOLIO_LOOK_AT_START));
   const cameraDestination = useRef(new THREE.Vector3());
   const lookAtDestination = useRef(new THREE.Vector3());
   const focusProgress = useRef(0);
@@ -119,7 +120,7 @@ function LaptopModel({ motionEnabled, scrollProgress }) {
     const focusedCamera = isMobile ? FOCUSED_CAMERA_MOBILE : FOCUSED_CAMERA_DESKTOP;
     const cameraPosition = cameraDestination.current.set(
       THREE.MathUtils.lerp(
-        isMobile ? -25 : PORTFOLIO_CAMERA_START[0],
+        isMobile ? -22 : PORTFOLIO_CAMERA_START[0],
         focusedCamera[0],
         progress
       ),
@@ -129,13 +130,17 @@ function LaptopModel({ motionEnabled, scrollProgress }) {
         progress
       ),
       THREE.MathUtils.lerp(
-        isMobile ? 48 : PORTFOLIO_CAMERA_START[2],
+        isMobile ? 42 : PORTFOLIO_CAMERA_START[2],
         focusedCamera[2],
         progress
       )
     );
     const lookAtPosition = lookAtDestination.current.set(
-      THREE.MathUtils.lerp(isMobile ? 6 : 10, DISPLAY_WORLD_CENTER[0], progress),
+      THREE.MathUtils.lerp(
+        isMobile ? 8 : PORTFOLIO_LOOK_AT_START[0],
+        DISPLAY_WORLD_CENTER[0],
+        progress
+      ),
       THREE.MathUtils.lerp(3, DISPLAY_WORLD_CENTER[1], progress),
       THREE.MathUtils.lerp(0, DISPLAY_WORLD_CENTER[2], progress)
     );
@@ -178,7 +183,6 @@ function LaptopModel({ motionEnabled, scrollProgress }) {
 export default function SolutionLaptop() {
   const section = useRef(null);
   const groundShadow = useRef(null);
-  const message = useRef(null);
   const scrollProgress = useRef(0);
   const [motionEnabled, setMotionEnabled] = useState(true);
 
@@ -211,10 +215,6 @@ export default function SolutionLaptop() {
           groundShadow.current.style.transform = `translateX(-50%) scale(${1 - progress * 0.12})`;
         }
 
-        if (message.current) {
-          message.current.style.opacity = String(Math.max(0, 1 - progress * 2.4));
-          message.current.style.transform = `translateY(-50%) translateX(${progress * 44}px)`;
-        }
       });
     };
 
@@ -252,26 +252,6 @@ export default function SolutionLaptop() {
           className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
           style={{ opacity: 0.28, transform: 'translateX(-50%)' }}
         />
-        <div
-          ref={message}
-          className="pointer-events-none absolute top-1/2 right-[8%] z-20 hidden w-[34%] max-w-[520px] -translate-y-1/2 sm:block"
-        >
-          <p className="mb-5 text-sm font-semibold tracking-[0.2em] text-blue-600">
-            ENTERPRISE AI CONTROL CENTER
-          </p>
-          <h1 className="text-[clamp(2.3rem,3.7vw,4.8rem)] leading-[1.08] font-semibold tracking-[-0.055em] text-slate-950">
-            기업의 AI를
-            <br />
-            발견하고, 통제하고,
-            <br />
-            관리합니다.
-          </h1>
-          <p className="mt-7 max-w-[470px] text-[clamp(1rem,1.15vw,1.25rem)] leading-8 text-slate-600">
-            Discover부터 Control, Manage까지.
-            <br />
-            신뢰할 수 있는 AI 활용 환경을 만듭니다.
-          </p>
-        </div>
         <Canvas
           aria-hidden="true"
           className="relative z-10"
