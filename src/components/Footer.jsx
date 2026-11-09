@@ -50,11 +50,11 @@ const footerMenus = [
 
 function FooterLogo() {
   return (
-    <span className="relative block h-8 w-[173px] overflow-hidden">
+    <span className="block w-[180px]">
       <img
-        src="/ondam_logo.png"
+        src="/ondam_logo_simbol.png"
         alt="ONDAM AI"
-        className="absolute top-[-21px] left-[-22px] h-auto w-[215px] max-w-none"
+        className="block h-auto w-full object-contain"
       />
     </span>
   );

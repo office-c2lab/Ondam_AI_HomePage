@@ -1,4 +1,5 @@
 import { BusFront, CarFront, MapPin, TrainFront } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import kakaoMapIcon from '../assets/images/kakaomap.png';
 import naverMapIcon from '../assets/images/navermap.jpg';
 
@@ -31,17 +32,24 @@ const transportOptions = [
   },
 ];
 
-const transportAnimationDelays = [
-  'directions-enter-subway',
-  'directions-enter-bus',
-  'directions-enter-car',
-];
-
 export default function Directions() {
+  const shouldReduceMotion = useReducedMotion();
+  const reveal = ({ delay = 0, x = 0, y = 28, scale = 1 } = {}) =>
+    shouldReduceMotion
+      ? { initial: false }
+      : {
+          initial: { opacity: 0, x, y, scale },
+          animate: { opacity: 1, x: 0, y: 0, scale: 1 },
+          transition: { duration: 0.82, delay, ease: [0.22, 1, 0.36, 1] },
+        };
+
   return (
     <section id="location" className="scroll-mt-[90px] bg-white">
       <div className="mx-auto w-full max-w-[1600px] px-5 pt-[calc(var(--site-header-height)+3rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+3.5rem)] sm:pb-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+4rem)] lg:pb-28 min-[1600px]:px-0">
-        <div className="page-enter page-enter-up mx-auto mb-10 max-w-4xl text-center lg:mb-14">
+        <motion.div
+          className="mx-auto mb-10 max-w-4xl text-center lg:mb-14"
+          {...reveal()}
+        >
           <h1 className="text-4xl leading-tight font-bold tracking-[-0.04em] text-[#101828] sm:text-5xl lg:text-[56px]">
             오시는 길
           </h1>
@@ -52,10 +60,13 @@ export default function Directions() {
             <MapPin className="h-5 w-5 shrink-0 text-[var(--brand-primary)]" />
             {companyAddress}
           </p>
-        </div>
+        </motion.div>
 
         <div className="grid items-stretch gap-10 xl:grid-cols-[minmax(0,1.65fr)_minmax(360px,0.7fr)] xl:gap-12">
-          <div className="page-enter page-enter-up directions-enter-map flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-[#dfe5ee] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:min-h-[650px]">
+          <motion.div
+            className="flex min-h-[520px] flex-col overflow-hidden rounded-3xl border border-[#dfe5ee] bg-white shadow-[0_20px_60px_rgba(15,23,42,0.08)] lg:min-h-[650px]"
+            {...reveal({ delay: 0.16, x: -34, y: 10, scale: 0.985 })}
+          >
             <iframe
               title="온담AI 위치 지도"
               src={`https://www.google.com/maps?q=${mapCoordinates}&z=17&output=embed`}
@@ -84,7 +95,7 @@ export default function Directions() {
                 네이버지도에서 보기
               </a>
             </div>
-          </div>
+          </motion.div>
 
           <aside className="h-full">
             <div className="grid h-full border-y border-[#dfe5ee] md:grid-cols-3 xl:grid-cols-1 xl:grid-rows-3">
@@ -92,13 +103,14 @@ export default function Directions() {
                 const Icon = option.icon;
 
                 return (
-                  <article
+                  <motion.article
                     key={option.title}
-                    className={`page-enter page-enter-up ${transportAnimationDelays[index]} py-8 md:px-8 xl:flex xl:flex-col xl:justify-center xl:px-1 ${
+                    className={`py-8 md:px-8 xl:flex xl:flex-col xl:justify-center xl:px-1 ${
                       index < transportOptions.length - 1
                         ? 'border-b border-[#dfe5ee] md:border-r md:border-b-0 xl:border-r-0 xl:border-b'
                         : ''
                     }`}
+                    {...reveal({ delay: 0.34 + index * 0.14, x: 30, y: 0 })}
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#edf5ff] text-[var(--brand-primary)]">
                       <Icon className="h-7 w-7" strokeWidth={1.7} />
@@ -117,7 +129,7 @@ export default function Directions() {
                         </li>
                       ))}
                     </ul>
-                  </article>
+                  </motion.article>
                 );
               })}
             </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Building2, Check, ChevronDown, ExternalLink } from 'lucide-react';
+import { Check, ChevronDown, ExternalLink } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 
 const fieldClass =
   'mt-2 h-12 w-full rounded-lg border border-[#d9dee8] bg-white px-4 text-[15px] text-[#101828] outline-none transition placeholder:text-[#98a2b3] focus:border-[var(--brand-primary)] focus:ring-3 focus:ring-[#075df6]/10';
@@ -126,9 +127,18 @@ function CustomSelect({
 }
 
 export default function Contact() {
+  const shouldReduceMotion = useReducedMotion();
   const [inquiryType, setInquiryType] = useState('');
   const [solution, setSolution] = useState([]);
   const [formError, setFormError] = useState('');
+  const reveal = ({ delay = 0, x = 0, y = 28, scale = 1 } = {}) =>
+    shouldReduceMotion
+      ? { initial: false }
+      : {
+          initial: { opacity: 0, x, y, scale },
+          animate: { opacity: 1, x: 0, y: 0, scale: 1 },
+          transition: { duration: 0.82, delay, ease: [0.22, 1, 0.36, 1] },
+        };
 
   const handleSolutionChange = nextValues => {
     const selectedAllNow =
@@ -183,7 +193,7 @@ export default function Contact() {
     >
       <div className="mx-auto grid w-full max-w-[1600px] gap-12 px-5 pt-[calc(var(--site-header-height)+4rem)] pb-16 sm:px-6 sm:pt-[calc(var(--site-header-height)+5rem)] sm:pb-20 lg:grid-cols-[minmax(0,0.9fr)_minmax(540px,1.1fr)] lg:gap-20 lg:px-8 lg:pt-[calc(var(--site-header-height)+6rem)] lg:pb-24 min-[1600px]:px-0">
         <div className="lg:sticky lg:top-[120px] lg:self-start lg:pt-5">
-          <div className="page-enter page-enter-up">
+          <motion.div {...reveal()}>
             <h1 className="mt-6 text-4xl leading-[1.18] font-bold tracking-[-0.045em] text-[#101828] sm:text-5xl lg:text-[56px]">
               기업의 AI 활용,
               <br />
@@ -193,9 +203,12 @@ export default function Contact() {
               ONDAM AI 도입과 기술 협력에 대해 궁금한 점을 남겨주세요.
               <br className="hidden sm:block" /> 담당자가 확인 후 안내해 드리겠습니다.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="page-enter page-enter-up contact-enter-logo relative mt-12 min-h-[430px] overflow-hidden rounded-2xl bg-[#e8f0ff] p-7 sm:p-10">
+          <motion.div
+            className="relative mt-12 min-h-[430px] overflow-hidden rounded-2xl bg-[#e8f0ff] p-7 sm:p-10"
+            {...reveal({ delay: 0.17, y: 36, scale: 0.97 })}
+          >
             <div
               className="absolute inset-0 opacity-45 [background-image:linear-gradient(rgba(7,93,246,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(7,93,246,0.08)_1px,transparent_1px)] [background-size:32px_32px]"
               aria-hidden="true"
@@ -210,12 +223,13 @@ export default function Contact() {
                 <img src="/ondam_simbol.png" alt="ONDAM AI" className="h-28 w-28 sm:h-36 sm:w-36" />
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
 
-        <form
-          className="page-enter page-enter-up contact-enter-form rounded-2xl border border-[#e1e6ef] bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-9 lg:p-11"
+        <motion.form
+          className="rounded-2xl border border-[#e1e6ef] bg-white p-6 shadow-[0_18px_55px_rgba(15,23,42,0.08)] sm:p-9 lg:p-11"
           onSubmit={handleSubmit}
+          {...reveal({ delay: 0.34, x: 36, y: 0 })}
         >
           <div className="space-y-6">
             <CustomSelect
@@ -371,7 +385,7 @@ export default function Contact() {
           >
             문의하기
           </button>
-        </form>
+        </motion.form>
       </div>
     </section>
   );

@@ -55,98 +55,6 @@ a {
   text-decoration: none;
 }
 
-.page-enter {
-  opacity: 0;
-  animation-duration: 820ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  animation-fill-mode: both;
-}
-
-.page-enter-up {
-  animation-name: page-enter-up;
-}
-
-.page-enter-left {
-  animation-name: page-enter-left;
-}
-
-.page-enter-right {
-  animation-name: page-enter-right;
-}
-
-.page-enter-delay-1 {
-  animation-delay: 140ms;
-}
-
-.page-enter-delay-2 {
-  animation-delay: 280ms;
-}
-
-.page-enter-delay-3 {
-  animation-delay: 420ms;
-}
-
-.page-enter-delay-4 {
-  animation-delay: 560ms;
-}
-
-.directions-enter-map {
-  animation-delay: 170ms;
-}
-
-.directions-enter-subway {
-  animation-delay: 390ms;
-}
-
-.directions-enter-bus {
-  animation-delay: 570ms;
-}
-
-.directions-enter-car {
-  animation-delay: 750ms;
-}
-
-.contact-enter-logo {
-  animation-delay: 170ms;
-}
-
-.contact-enter-form {
-  animation-delay: 390ms;
-}
-
-@keyframes page-enter-up {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 24px, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes page-enter-left {
-  from {
-    opacity: 0;
-    transform: translate3d(-32px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes page-enter-right {
-  from {
-    opacity: 0;
-    transform: translate3d(32px, 0, 0);
-  }
-  to {
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
 @keyframes team-detail-drawer-in {
   from {
     transform: translate3d(48px, 0, 0);
@@ -161,15 +69,6 @@ a {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .page-enter,
-  .page-enter-up,
-  .page-enter-left,
-  .page-enter-right {
-    opacity: 1;
-    transform: none;
-    animation: none;
-  }
-
   .team-detail-drawer {
     animation: none;
   }
