@@ -11,7 +11,7 @@ import LibraryView from './components/LibraryView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 import usePreferencesStore from '../../../stores/preferencesStore.js';
 
-const SCROLL_DEMO_PROMPT = '온담AI에는 어떤 AI 솔루션이 있나요?';
+const SCROLL_DEMO_PROMPT = '온담AI에서는 어떤 솔루션을 제공하나요?';
 
 function mapProgress(progress, start, end) {
   return Math.max(0, Math.min(1, (progress - start) / (end - start)));
@@ -251,6 +251,14 @@ export default function OndamPage() {
   const demoAnswer = createMockAnswer(SCROLL_DEMO_PROMPT);
   const demoAnswerProgress = mapProgress(scrollDemoProgress, 0.6, 0.94);
   const demoAnswerLength = Math.round(demoAnswer.length * demoAnswerProgress);
+  const demoCreditCost = Math.round(640 * demoAnswerProgress);
+  const demoUser = {
+    name: 'rex307',
+    email: 'rex307@ondam.ai',
+    plan: 'Plus',
+    remainingCredits: 1000000 - demoCreditCost,
+    totalCredits: 1000000,
+  };
   const demoMessages = isDemoSubmitted
     ? [
         { id: 'scroll-demo-user', role: 'user', content: SCROLL_DEMO_PROMPT },
@@ -281,6 +289,7 @@ export default function OndamPage() {
       >
         {isSidebarOpen ? (
           <OndamSidebar
+            user={demoUser}
             activeChatId={activeMenu ? null : activeChatId}
             onNewChat={startNewChat}
             onSelectChat={selectChat}
