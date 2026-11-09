@@ -42,6 +42,7 @@ const leaders = [
       '시장 확대 및 사업화 전략 추진',
     ],
   },
+
   {
     name: '김은석',
     role: 'Platform Lead',
@@ -54,6 +55,8 @@ const leaders = [
       '제품 안정성 확보 및 기능 고도화',
     ],
   },
+  /// 리더님 공개 금지
+
   {
     name: '최명원',
     role: 'AI Lead',

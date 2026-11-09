@@ -27,7 +27,7 @@ function HeaderLogo({ inverse = false }) {
 
 export default function Header() {
   const currentPath = window.location.pathname.replace(/\/+$/, '') || '/';
-  const isCareersPage = currentPath === '/careers';
+  const hasDarkHero = currentPath === '/careers';
   const items = useMemo(
     () => [
       {
@@ -42,13 +42,13 @@ export default function Header() {
       },
       {
         label: '솔루션&서비스',
-        href: '#platform',
+        href: '/#platform',
         children: [
-          { label: '플랫폼 개요', href: '#platform-overview' },
-          { label: 'Discover', href: '#discover' },
-          { label: 'Control Internal', href: '#control-internal' },
-          { label: 'Control External', href: '#control-external' },
-          { label: 'Manage', href: '#manage' },
+          { label: '플랫폼 개요', href: '/#platform-overview' },
+          { label: 'Discover', href: '/#discover' },
+          { label: 'Control Internal', href: '/#control-internal' },
+          { label: 'Control External', href: '/#control-external' },
+          { label: 'Manage', href: '/#manage' },
         ],
       },
       {
@@ -75,7 +75,7 @@ export default function Header() {
       },
       {
         label: '고객지원',
-        href: '#support',
+        href: '/contact',
         children: [
           { label: '도입 문의', href: '/contact' },
           { label: '오시는 길', href: '/location' },
@@ -185,7 +185,7 @@ export default function Header() {
   };
 
   const hasSolidBackground = isScrolledHeaderSolid || isDropdownOpen;
-  const useOverlayColors = isCareersPage && !hasSolidBackground;
+  const useOverlayColors = hasDarkHero && !hasSolidBackground;
   const foregroundClass = useOverlayColors ? 'text-white' : 'text-[#1c2025]';
 
   return (

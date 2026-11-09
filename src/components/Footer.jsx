@@ -11,11 +11,11 @@ const footerMenus = [
   {
     title: '솔루션&서비스',
     links: [
-      ['플랫폼 개요', '#platform-overview'],
-      ['Discover', '#discover'],
-      ['Control Internal', '#control-internal'],
-      ['Control External', '#control-external'],
-      ['Manage', '#manage'],
+      ['플랫폼 개요', '/#platform-overview'],
+      ['Discover', '/#discover'],
+      ['Control Internal', '/#control-internal'],
+      ['Control External', '/#control-external'],
+      ['Manage', '/#manage'],
     ],
   },
   {
