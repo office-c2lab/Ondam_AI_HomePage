@@ -17,9 +17,15 @@ const suggestions = [
   },
 ];
 
-export default function NewChatView({ onSubmit, onStartVoice, themeMode = 'light' }) {
+export default function NewChatView({
+  onSubmit,
+  onStartVoice,
+  themeMode = 'light',
+  demoPrompt = null,
+}) {
   const [prompt, setPrompt] = useState('');
   const [isListening, setIsListening] = useState(false);
+  const visiblePrompt = demoPrompt ?? prompt;
 
   const inputRef = useRef(null);
   const fileInputRef = useRef(null);
@@ -65,13 +71,13 @@ export default function NewChatView({ onSubmit, onStartVoice, themeMode = 'light
 
         {/* 메인 제목 */}
         <h1 className="text-center text-[26px] font-medium tracking-[-0.025em] text-[#0d0d0d] sm:text-[28px]">
-          기업의 AI 운영을 어디서부터 살펴볼까요?
+          오늘은 어떤 생각이 드나요?
         </h1>
 
         <p className="mt-2 text-center text-[14px] text-[#777]" aria-live="polite">
-          {prompt.trim()
+          {visiblePrompt.trim()
             ? '좋은 질문이에요. 준비되면 바로 보내주세요.'
-            : '내부 AI부터 외부 서비스까지, 하나의 흐름으로 확인해보세요.'}
+            : '업무 정리부터 파일 분석, 새로운 아이디어까지 함께할게요.'}
         </p>
 
         {/* 메시지 입력창 */}
@@ -101,8 +107,10 @@ export default function NewChatView({ onSubmit, onStartVoice, themeMode = 'light
           {/* 메시지 입력 */}
           <input
             ref={inputRef}
-            value={prompt}
-            onChange={event => setPrompt(event.target.value)}
+            value={visiblePrompt}
+            onChange={event => {
+              if (demoPrompt === null) setPrompt(event.target.value);
+            }}
             className="min-w-0 flex-1 bg-transparent px-1.5 text-[15px] text-[#222] outline-none placeholder:text-[#888]"
             placeholder="ONDAM AI에게 물어보세요"
             aria-label="메시지"
@@ -129,13 +137,13 @@ export default function NewChatView({ onSubmit, onStartVoice, themeMode = 'light
 
           {/* 메시지 전송 / 음성 대화 */}
           <button
-            type={prompt.trim() ? 'submit' : 'button'}
-            onClick={!prompt.trim() ? () => onStartVoice?.() : undefined}
+            type={visiblePrompt.trim() ? 'submit' : 'button'}
+            onClick={!visiblePrompt.trim() ? () => onStartVoice?.() : undefined}
             className="ml-1.5 grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#3c7cf6] text-white transition hover:bg-[#2f6fe8] disabled:opacity-50"
-            aria-label={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
-            title={prompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
+            aria-label={visiblePrompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
+            title={visiblePrompt.trim() ? '메시지 보내기' : '음성 대화 시작'}
           >
-            {prompt.trim() ? (
+            {visiblePrompt.trim() ? (
               <ArrowUp className="h-[19px] w-[19px]" strokeWidth={2} aria-hidden="true" />
             ) : (
               <AudioLines className="h-[19px] w-[19px]" strokeWidth={2} aria-hidden="true" />

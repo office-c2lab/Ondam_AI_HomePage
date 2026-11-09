@@ -11,6 +11,12 @@ import LibraryView from './components/LibraryView.jsx';
 import { createMockAnswer } from './components/mockResponses.js';
 import usePreferencesStore from '../../../stores/preferencesStore.js';
 
+const SCROLL_DEMO_PROMPT = '온담AI에는 어떤 AI 솔루션이 있나요?';
+
+function mapProgress(progress, start, end) {
+  return Math.max(0, Math.min(1, (progress - start) / (end - start)));
+}
+
 export default function OndamPage() {
   const isDarkModeEnabled = usePreferencesStore(state => state.isDarkModeEnabled);
   const characterThemeMode = isDarkModeEnabled ? 'dark' : 'light';
@@ -27,6 +33,7 @@ export default function OndamPage() {
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isVoiceMode, setIsVoiceMode] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
+  const [scrollDemoProgress, setScrollDemoProgress] = useState(0);
   const [isAssistantEnabled, setIsAssistantEnabled] = useState(() => {
     return window.localStorage.getItem('ondam-assistant-enabled') === 'true';
   });
@@ -47,6 +54,23 @@ export default function OndamPage() {
   };
 
   useEffect(() => () => clearResponseTimers(), []);
+
+  useEffect(() => {
+    const updateScrollDemo = event => {
+      if (
+        event.source !== window.parent ||
+        event.origin !== window.location.origin ||
+        event.data?.type !== 'ondam-scroll-demo'
+      ) {
+        return;
+      }
+
+      setScrollDemoProgress(Math.max(0, Math.min(1, Number(event.data.progress) || 0)));
+    };
+
+    window.addEventListener('message', updateScrollDemo);
+    return () => window.removeEventListener('message', updateScrollDemo);
+  }, []);
 
   useEffect(() => {
     document.body.classList.toggle('ondam-dark-active', isDarkModeEnabled);
@@ -217,6 +241,33 @@ export default function OndamPage() {
     setActiveMenu(menuId);
   };
 
+  const isScrollDemo = window.parent !== window;
+  const demoTypingProgress = mapProgress(scrollDemoProgress, 0.04, 0.38);
+  const demoPrompt = SCROLL_DEMO_PROMPT.slice(
+    0,
+    Math.round(SCROLL_DEMO_PROMPT.length * demoTypingProgress)
+  );
+  const isDemoSubmitted = isScrollDemo && scrollDemoProgress >= 0.46;
+  const demoAnswer = createMockAnswer(SCROLL_DEMO_PROMPT);
+  const demoAnswerProgress = mapProgress(scrollDemoProgress, 0.6, 0.94);
+  const demoAnswerLength = Math.round(demoAnswer.length * demoAnswerProgress);
+  const demoMessages = isDemoSubmitted
+    ? [
+        { id: 'scroll-demo-user', role: 'user', content: SCROLL_DEMO_PROMPT },
+        ...(demoAnswerProgress > 0
+          ? [
+              {
+                id: 'scroll-demo-assistant',
+                role: 'assistant',
+                content: demoAnswer.slice(0, Math.max(3, demoAnswerLength)),
+                isStreaming: demoAnswerProgress < 1,
+              },
+            ]
+          : []),
+      ]
+    : [];
+  const isDemoResponding = isDemoSubmitted && demoAnswerProgress < 1;
+
   return (
     <div
       className={`flex h-full overflow-hidden bg-white text-[#0d0d0d] ${
@@ -280,17 +331,18 @@ export default function OndamPage() {
             onOpenSettings={openProjectSettings}
             onStartVoice={() => setIsVoiceMode(true)}
           />
-        ) : !activeChatId ? (
+        ) : !activeChatId && !isDemoSubmitted ? (
           <NewChatView
             themeMode={characterThemeMode}
             onSubmit={submitPrompt}
             onStartVoice={() => setIsVoiceMode(true)}
+            demoPrompt={isScrollDemo ? demoPrompt : null}
           />
         ) : (
           <ChatView
-            messages={messages}
+            messages={isDemoSubmitted ? demoMessages : messages}
             onSubmit={submitPrompt}
-            isResponding={isResponding}
+            isResponding={isDemoSubmitted ? isDemoResponding : isResponding}
             isLoadingHistory={isLoadingHistory}
             isAssistantEnabled={isAssistantEnabled}
             themeMode={characterThemeMode}

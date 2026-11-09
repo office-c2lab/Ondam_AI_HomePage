@@ -217,7 +217,6 @@ function Composer({ onSubmit, onStartVoice, disabled = false }) {
 
       {/* 메시지 입력 */}
       <input
-        autoFocus
         disabled={disabled}
         value={prompt}
         onChange={event => setPrompt(event.target.value)}
@@ -304,7 +303,7 @@ export default function ChatView({
 }) {
   const [copiedId, setCopiedId] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
-  const bottomRef = useRef(null);
+  const messageScrollRef = useRef(null);
   const wasRespondingRef = useRef(isResponding);
 
   const lastMessage = messages.at(-1);
@@ -330,12 +329,11 @@ export default function ChatView({
     };
   }, [isResponding]);
 
-  // 새 메시지가 추가되면 맨 아래로 스크롤
+  // iframe 바깥 문서에는 영향을 주지 않고 채팅 영역 안에서만 스크롤합니다.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({
-      behavior: lastMessage?.isStreaming ? 'auto' : 'smooth',
-      block: 'end',
-    });
+    const scrollContainer = messageScrollRef.current;
+    if (!scrollContainer) return;
+    scrollContainer.scrollTop = scrollContainer.scrollHeight;
   }, [lastMessage, messages]);
 
   // 답변 복사
@@ -378,6 +376,7 @@ export default function ChatView({
 
       {/* 채팅 메시지 영역 */}
       <div
+        ref={messageScrollRef}
         className={`
           min-h-0 w-full flex-1 overflow-y-auto
           ${isAssistantEnabled ? 'pb-56' : 'pb-44'} pt-8
@@ -513,9 +512,6 @@ export default function ChatView({
               </div>
             </div>
           )}
-
-          {/* 자동 스크롤 기준 */}
-          <div ref={bottomRef} />
         </div>
       </div>
 

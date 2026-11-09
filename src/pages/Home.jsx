@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react';
-import { motion, useReducedMotion } from 'motion/react';
+import { motion as Motion, useReducedMotion } from 'motion/react';
 import SolutionLaptop, { SolutionMenu } from '../components/SolutionLaptop.jsx';
 
 export default function Home() {
@@ -19,6 +19,7 @@ export default function Home() {
           animate: { opacity: 1, y: '0%' },
           transition: { duration: 0.78, delay, ease: [0.22, 1, 0.36, 1] },
         };
+
   return (
     <section id="platform" className="relative min-h-screen">
       <section
@@ -29,7 +30,7 @@ export default function Home() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 flex items-center justify-center overflow-hidden"
         >
-          <motion.div
+          <Motion.div
             className="h-[clamp(420px,58vw,880px)] w-[clamp(420px,58vw,880px)] rounded-full bg-[radial-gradient(circle,rgba(11,92,255,0.14)_0%,rgba(63,122,240,0.065)_38%,transparent_70%)] blur-[18px]"
             initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.86 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -42,25 +43,25 @@ export default function Home() {
             id="platform-title"
             className="overflow-hidden pb-[0.08em] text-[clamp(3rem,5.8vw,6.6rem)] leading-[1.08] font-semibold tracking-[-0.06em] text-slate-950 [text-wrap:balance]"
           >
-            <motion.span className="inline-block" {...titleMotion}>
+            <Motion.span className="inline-block" {...titleMotion}>
               모든 <span className="text-[#0b5cff]">AI</span>를, 하나의 통제 안에
-            </motion.span>
+            </Motion.span>
           </h1>
           <p className="mt-8 text-[clamp(1rem,1.35vw,1.4rem)] leading-[1.7] font-medium tracking-[-0.02em] text-slate-600">
             <span className="block overflow-hidden">
-              <motion.span className="block" {...copyMotion(0.52)}>
+              <Motion.span className="block" {...copyMotion(0.52)}>
                 기업 내부와 외부의 모든 AI를
-              </motion.span>
+              </Motion.span>
             </span>
             <span className="block overflow-hidden">
-              <motion.span className="block" {...copyMotion(0.66)}>
+              <Motion.span className="block" {...copyMotion(0.66)}>
                 하나의 플랫폼에서 발견·통제·관리합니다
-              </motion.span>
+              </Motion.span>
             </span>
           </p>
         </div>
 
-        <motion.a
+        <Motion.a
           href="#platform-overview"
           aria-label="플랫폼 미리보기 섹션으로 이동"
           className="group absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-slate-400 transition-colors hover:text-slate-700 sm:bottom-8 [@media(max-height:720px)]:bottom-3"
@@ -70,21 +71,19 @@ export default function Home() {
         >
           <span className="text-[11px] font-semibold tracking-[0.28em] uppercase">Scroll</span>
           <span className="flex h-10 w-6 justify-center rounded-full border border-slate-300 pt-2 transition-colors group-hover:border-slate-500">
-            <motion.span
+            <Motion.span
               className="h-1.5 w-1.5 rounded-full bg-[#0b5cff]"
-              animate={
-                shouldReduceMotion ? undefined : { y: [0, 13, 0], opacity: [1, 0.35, 1] }
-              }
+              animate={shouldReduceMotion ? undefined : { y: [0, 13, 0], opacity: [1, 0.35, 1] }}
               transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
             />
           </span>
-          <motion.span
+          <Motion.span
             animate={shouldReduceMotion ? undefined : { y: [0, 4, 0] }}
             transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
           >
             <ChevronDown className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-          </motion.span>
-        </motion.a>
+          </Motion.span>
+        </Motion.a>
       </section>
 
       <div id="platform-overview" className="w-full" aria-label="ONDAM AI 플랫폼 미리보기">

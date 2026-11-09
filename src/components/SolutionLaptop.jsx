@@ -191,7 +191,7 @@ function makeLogoTexture() {
   return texture;
 }
 
-function EmbeddedOndamScreen({ screenRef }) {
+function EmbeddedOndamScreen({ screenRef, iframeRef, onIframeLoad }) {
   return (
     <Html
       transform
@@ -214,15 +214,17 @@ function EmbeddedOndamScreen({ screenRef }) {
         }}
       >
         <iframe
+          ref={iframeRef}
           src="/embedded/ondam-screen"
           title=""
+          onLoad={onIframeLoad}
           tabIndex={-1}
-          width="1440"
-          height="906"
+          width="1280"
+          height="805"
           className="block border-0"
           style={{
             pointerEvents: 'none',
-            transform: 'scale(1.31945)',
+            transform: 'scale(1.484375)',
             transformOrigin: 'top left',
           }}
         />
@@ -231,10 +233,12 @@ function EmbeddedOndamScreen({ screenRef }) {
   );
 }
 
-function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
+function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgress }) {
   const group = useRef(null);
   const screen = useRef(null);
+  const iframe = useRef(null);
   const logoMaterial = useRef(null);
+  const lastDemoProgress = useRef(-1);
   const cameraLookAt = useRef(new THREE.Vector3(...PORTFOLIO_LOOK_AT_START));
   const cameraDestination = useRef(new THREE.Vector3());
   const lookAtDestination = useRef(new THREE.Vector3());
@@ -280,6 +284,17 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
   }, [rig]);
 
   useFrame((state, delta) => {
+    if (
+      iframe.current?.contentWindow &&
+      Math.abs(demoProgress.current - lastDemoProgress.current) > 0.002
+    ) {
+      iframe.current.contentWindow.postMessage(
+        { type: 'ondam-scroll-demo', progress: demoProgress.current },
+        window.location.origin
+      );
+      lastDemoProgress.current = demoProgress.current;
+    }
+
     entryMotion.current = motionEnabled
       ? THREE.MathUtils.damp(entryMotion.current, entryProgress.current, 5, delta)
       : entryProgress.current > 0
@@ -357,7 +372,13 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress }) {
     <group ref={group} rotation={[0.38, 0, 0]} position={[0, -13.5, 5]} scale={70}>
       <primitive object={rig.scene} />
       <group scale={0.01}>
-        <EmbeddedOndamScreen screenRef={screen} />
+        <EmbeddedOndamScreen
+          screenRef={screen}
+          iframeRef={iframe}
+          onIframeLoad={() => {
+            lastDemoProgress.current = -1;
+          }}
+        />
       </group>
     </group>
   );
@@ -367,6 +388,7 @@ export default function SolutionLaptop() {
   const section = useRef(null);
   const groundShadow = useRef(null);
   const scrollProgress = useRef(0);
+  const demoProgress = useRef(0);
   const entryProgress = useRef(0);
   const [motionEnabled, setMotionEnabled] = useState(true);
   const { scrollYProgress } = useScroll({
@@ -402,14 +424,16 @@ export default function SolutionLaptop() {
           0,
           1
         );
-        scrollProgress.current = progress;
+        const laptopProgress = THREE.MathUtils.clamp(progress / 0.4, 0, 1);
+        scrollProgress.current = laptopProgress;
+        demoProgress.current = THREE.MathUtils.clamp((progress - 0.4) / 0.6, 0, 1);
         entryProgress.current = entrance;
 
         if (groundShadow.current) {
           groundShadow.current.style.opacity = String(
-            Math.max(0, 0.28 * entrance * (1 - progress * 2.2))
+            Math.max(0, 0.28 * entrance * (1 - laptopProgress * 2.2))
           );
-          groundShadow.current.style.transform = `translateX(-50%) scale(${(0.58 + entrance * 0.42) * (1 - progress * 0.12)})`;
+          groundShadow.current.style.transform = `translateX(-50%) scale(${(0.58 + entrance * 0.42) * (1 - laptopProgress * 0.12)})`;
         }
       });
     };
@@ -425,7 +449,7 @@ export default function SolutionLaptop() {
   }, []);
 
   return (
-    <div ref={section} className="relative h-[200vh] w-full">
+    <div ref={section} className="relative h-[420vh] w-full">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_58%_at_50%_72%,rgba(37,99,235,0.16)_0%,rgba(96,165,250,0.07)_40%,transparent_72%)]" />
@@ -459,6 +483,7 @@ export default function SolutionLaptop() {
               motionEnabled={motionEnabled}
               scrollProgress={scrollProgress}
               entryProgress={entryProgress}
+              demoProgress={demoProgress}
             />
           </Suspense>
         </Canvas>
