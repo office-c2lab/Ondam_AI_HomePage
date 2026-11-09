@@ -1,9 +1,13 @@
 import { ChevronDown } from 'lucide-react';
-import { motion as Motion, useReducedMotion } from 'motion/react';
+import { motion as Motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import SolutionLaptop, { SolutionMenu } from '../components/SolutionLaptop.jsx';
 
 export default function Home() {
   const shouldReduceMotion = useReducedMotion();
+  const { scrollY } = useScroll();
+  const indicatorOpacity = useTransform(scrollY, [0, 120], [1, 0]);
+  const indicatorY = useTransform(scrollY, [0, 120], [0, 12]);
+  const indicatorPointerEvents = useTransform(scrollY, value => (value > 80 ? 'none' : 'auto'));
   const titleMotion = shouldReduceMotion
     ? { initial: false }
     : {
@@ -61,29 +65,42 @@ export default function Home() {
           </p>
         </div>
 
-        <Motion.a
-          href="#platform-overview"
-          aria-label="플랫폼 미리보기 섹션으로 이동"
-          className="group absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-2 text-slate-400 transition-colors hover:text-slate-700 sm:bottom-8 [@media(max-height:720px)]:bottom-3"
-          initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: shouldReduceMotion ? 0 : 1.55, ease: 'easeOut' }}
+        <Motion.div
+          className="absolute bottom-5 left-1/2 z-10 -translate-x-1/2 sm:bottom-8 [@media(max-height:720px)]:bottom-3"
+          style={{
+            opacity: indicatorOpacity,
+            y: indicatorY,
+            pointerEvents: indicatorPointerEvents,
+          }}
         >
-          <span className="text-[11px] font-semibold tracking-[0.28em] uppercase">Scroll</span>
-          <span className="flex h-10 w-6 justify-center rounded-full border border-slate-300 pt-2 transition-colors group-hover:border-slate-500">
-            <Motion.span
-              className="h-1.5 w-1.5 rounded-full bg-[#0b5cff]"
-              animate={shouldReduceMotion ? undefined : { y: [0, 13, 0], opacity: [1, 0.35, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-            />
-          </span>
-          <Motion.span
-            animate={shouldReduceMotion ? undefined : { y: [0, 4, 0] }}
-            transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+          <Motion.a
+            href="#platform-overview"
+            aria-label="플랫폼 미리보기 섹션으로 이동"
+            className="group flex flex-col items-center gap-2 text-slate-400 transition-colors hover:text-slate-700"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.6,
+              delay: shouldReduceMotion ? 0 : 1.55,
+              ease: 'easeOut',
+            }}
           >
-            <ChevronDown className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
-          </Motion.span>
-        </Motion.a>
+            <span className="text-[11px] font-semibold tracking-[0.28em] uppercase">Scroll</span>
+            <span className="flex h-10 w-6 justify-center rounded-full border border-slate-300 pt-2 transition-colors group-hover:border-slate-500">
+              <Motion.span
+                className="h-1.5 w-1.5 rounded-full bg-[#0b5cff]"
+                animate={shouldReduceMotion ? undefined : { y: [0, 13, 0], opacity: [1, 0.35, 1] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </span>
+            <Motion.span
+              animate={shouldReduceMotion ? undefined : { y: [0, 4, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <ChevronDown className="h-4 w-4" strokeWidth={1.8} aria-hidden="true" />
+            </Motion.span>
+          </Motion.a>
+        </Motion.div>
       </section>
 
       <div id="platform-overview" className="w-full" aria-label="ONDAM AI 플랫폼 미리보기">
