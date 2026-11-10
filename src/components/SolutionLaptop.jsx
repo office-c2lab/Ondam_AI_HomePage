@@ -12,16 +12,26 @@ const DISPLAY_WORLD_CENTER = [0, 8.72, -10.2];
 const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 14];
 const FOCUSED_CAMERA_MOBILE = [0, 8.72, 26];
 const LAPTOP_FOCUS_END = 0.24;
+const LAPTOP_DEMO_END = 0.58;
+const LAPTOP_RETREAT_DURATION = 0.14;
 const SOLUTION_MENU_EXIT_END = 0.64;
 const LAPTOP_STAGE_END = 0.76;
 const ORIGINAL_SCROLL_VH = 620;
+const AI_RESPONSE_HOLD_SCROLL_VH = 80;
+const LAPTOP_SCROLL_VH = ORIGINAL_SCROLL_VH * LAPTOP_STAGE_END + AI_RESPONSE_HOLD_SCROLL_VH;
+const VIDEO_LEAD_IN_SCROLL_VH = 24.8;
+const VIDEO_SCRUB_SCROLL_VH = 360;
+const VIDEO_END_HOLD_SCROLL_VH = 24;
 const OVERHAUL_START_TIME = 0;
+const OVERHAUL_VIDEO_FPS = 60;
+const VIDEO_FRAME_DURATION = 1 / OVERHAUL_VIDEO_FPS;
 // Fitted to the six outer corners in overhaul-scroll.mp4's first frame.
 const OVERHAUL_CAMERA = [-36.51703, -0.75835, 48.66409];
 const OVERHAUL_LOOK_AT = [2.15498, 2.50677, -3];
 const OVERHAUL_CAMERA_UP = [0.1245575, 0.9922124, 0];
 const OVERHAUL_FOV = 29.046434;
 const OVERHAUL_LID_ANGLE = 0.0912476;
+const DEPLOYMENT_VIDEO_SCALE = 0.88;
 
 function getOverhaulFrame(width, height) {
   const mobile = width < 640;
@@ -31,6 +41,28 @@ function getOverhaulFrame(width, height) {
     height: (frameWidth * 9) / 16,
     centerX: width * (mobile ? 0.5 : 0.37),
     centerY: height * (mobile ? 0.5 : 0.51),
+  };
+}
+
+function getDeploymentVideoFrame(width, height) {
+  if (width >= 1024) {
+    const contentWidth = Math.min(width, 1920);
+    const frameWidth = contentWidth * 0.61 * DEPLOYMENT_VIDEO_SCALE;
+    return {
+      width: frameWidth,
+      height: (frameWidth * 9) / 16,
+      centerX: width * 0.5 - contentWidth * 0.13,
+      centerY: height * 0.51,
+    };
+  }
+
+  const frameWidth = Math.min(width * 0.92, height * (height < 600 ? 0.3 : 0.4) * (16 / 9));
+  const frameHeight = (frameWidth * 9) / 16;
+  return {
+    width: frameWidth * DEPLOYMENT_VIDEO_SCALE,
+    height: frameHeight * DEPLOYMENT_VIDEO_SCALE,
+    centerX: width * 0.5,
+    centerY: Math.max(height * 0.32, frameHeight / 2 + 80),
   };
 }
 
@@ -171,6 +203,35 @@ function DesktopSolutionMenu({ scrollProgress, motionEnabled }) {
         ))}
       </nav>
     </div>
+  );
+}
+
+function LaptopRetreatCopy({ retreatProgress, motionEnabled }) {
+  const opacity = useTransform(retreatProgress, [0.84, 1], [0, 1]);
+  const x = useTransform(retreatProgress, [0.84, 1], [24, 0]);
+  const visibility = useTransform(opacity, value => (value <= 0.01 ? 'hidden' : 'visible'));
+
+  return (
+    <Motion.aside
+      aria-labelledby="laptop-retreat-title"
+      className="solution-stage-copy pointer-events-none absolute z-20 hidden xl:block"
+      style={{ opacity, visibility, x: motionEnabled ? x : 0 }}
+    >
+      <h3
+        id="laptop-retreat-title"
+        className="text-[clamp(1.5rem,1.75vw,2rem)] leading-[1.45] font-bold tracking-[-0.04em] break-keep text-slate-950"
+      >
+        <span className="block">서비스의 발견과 분석부터,</span>
+        <span className="block">내부·외부 사용 통제,</span>
+        <span className="block">
+          <span className="text-[#0b5cff]">App·Agent</span> 운영까지.
+        </span>
+        <span className="mt-[0.65em] block">
+          기업의 모든 <span className="text-[#0b5cff]">AI</span>를
+        </span>
+        <span className="block">한곳에서 관리합니다.</span>
+      </h3>
+    </Motion.aside>
   );
 }
 
@@ -554,6 +615,7 @@ function StudioBackground({ backgroundRef }) {
 }
 
 export default function SolutionLaptop() {
+  const shouldReduceMotion = useReducedMotion();
   const section = useRef(null);
   const videoSection = useRef(null);
   const studioBackground = useRef(null);
@@ -578,12 +640,37 @@ export default function SolutionLaptop() {
   });
   const laptopFocusProgress = useTransform(
     scrollYProgress,
-    [0, LAPTOP_FOCUS_END / LAPTOP_STAGE_END],
+    [0, (ORIGINAL_SCROLL_VH * LAPTOP_FOCUS_END) / LAPTOP_SCROLL_VH],
+    [0, 1]
+  );
+  const laptopRetreatProgress = useTransform(
+    scrollYProgress,
+    [
+      (ORIGINAL_SCROLL_VH * LAPTOP_DEMO_END + AI_RESPONSE_HOLD_SCROLL_VH) / LAPTOP_SCROLL_VH,
+      (ORIGINAL_SCROLL_VH * (LAPTOP_DEMO_END + LAPTOP_RETREAT_DURATION) +
+        AI_RESPONSE_HOLD_SCROLL_VH) /
+        LAPTOP_SCROLL_VH,
+    ],
     [0, 1]
   );
   const menuPointerEvents = useTransform(laptopFocusProgress, value =>
     value >= SOLUTION_MENU_EXIT_END ? 'none' : 'auto'
   );
+  const introductionLineVariants = {
+    hidden: shouldReduceMotion
+      ? { opacity: 1, y: '0%', filter: 'blur(0px)' }
+      : { opacity: 0, y: '110%', filter: 'blur(8px)' },
+    visible: order => ({
+      opacity: 1,
+      y: '0%',
+      filter: 'blur(0px)',
+      transition: {
+        duration: shouldReduceMotion ? 0 : order < 2 ? 0.95 : 0.75,
+        delay: shouldReduceMotion ? 0 : order < 2 ? order * 0.14 : 0.42 + (order - 2) * 0.14,
+        ease: [0.16, 1, 0.3, 1],
+      },
+    }),
+  };
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -598,28 +685,77 @@ export default function SolutionLaptop() {
     let videoAnimationFrame = 0;
     let previousVideoTick = 0;
     let scrubbedTime = 0;
+    let layoutWidth = 0;
+    let layoutHeight = 0;
+
+    const updateSceneLayout = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const video = overhaulVideo.current;
+      if (!video || (width === layoutWidth && height === layoutHeight)) return;
+      layoutWidth = width;
+      layoutHeight = height;
+      const frame = getOverhaulFrame(width, height);
+      const videoFrame = getDeploymentVideoFrame(width, height);
+      for (const [background, backgroundFrame] of [
+        [studioBackground.current, frame],
+        [videoStudioBackground.current, videoFrame],
+      ]) {
+        if (!background) continue;
+        const frameTop = backgroundFrame.centerY - backgroundFrame.height / 2;
+        background.style.setProperty('--studio-top', `${frameTop}px`);
+        background.style.setProperty(
+          '--studio-quarter',
+          `${frameTop + backgroundFrame.height * 0.25}px`
+        );
+        background.style.setProperty(
+          '--studio-middle',
+          `${frameTop + backgroundFrame.height * 0.5}px`
+        );
+        background.style.setProperty(
+          '--studio-floor',
+          `${frameTop + backgroundFrame.height * 0.75}px`
+        );
+        background.style.setProperty('--studio-bottom', `${frameTop + backgroundFrame.height}px`);
+        background.style.setProperty(
+          '--studio-left',
+          `${backgroundFrame.centerX - backgroundFrame.width / 2}px`
+        );
+        background.style.setProperty(
+          '--studio-right',
+          `${backgroundFrame.centerX + backgroundFrame.width / 2}px`
+        );
+      }
+      video.style.width = `${videoFrame.width}px`;
+      video.style.height = `${videoFrame.height}px`;
+      video.style.left = `${videoFrame.centerX}px`;
+      video.style.top = `${videoFrame.centerY}px`;
+    };
 
     const syncVideoFrame = timestamp => {
       videoAnimationFrame = 0;
       const video = overhaulVideo.current;
       if (!video || !videoHasFrame.current || !Number.isFinite(video.duration)) return;
-
-      const frameDuration = 1 / 24;
       const elapsed = previousVideoTick
         ? Math.min((timestamp - previousVideoTick) / 1000, 0.05)
         : 1 / 60;
       previousVideoTick = timestamp;
-      scrubbedTime = THREE.MathUtils.damp(scrubbedTime, desiredVideoTime.current, 16, elapsed);
+      scrubbedTime = THREE.MathUtils.damp(scrubbedTime, desiredVideoTime.current, 12, elapsed);
       const targetTime = Math.min(
-        Math.round(scrubbedTime / frameDuration) * frameDuration,
-        Math.max(video.duration - frameDuration, 0)
+        Math.round(scrubbedTime / VIDEO_FRAME_DURATION) * VIDEO_FRAME_DURATION,
+        Math.max(video.duration - VIDEO_FRAME_DURATION, 0)
       );
-      if (!video.seeking && Math.abs(targetTime - lastVideoTime.current) > frameDuration / 2) {
+      if (
+        !video.seeking &&
+        Math.abs(targetTime - lastVideoTime.current) > VIDEO_FRAME_DURATION / 2
+      ) {
         video.currentTime = targetTime;
         lastVideoTime.current = targetTime;
       }
-
-      if (video.seeking || Math.abs(scrubbedTime - desiredVideoTime.current) > frameDuration / 8) {
+      if (
+        video.seeking ||
+        Math.abs(scrubbedTime - desiredVideoTime.current) > VIDEO_FRAME_DURATION / 8
+      ) {
         videoAnimationFrame = window.requestAnimationFrame(syncVideoFrame);
       } else {
         previousVideoTick = 0;
@@ -627,25 +763,42 @@ export default function SolutionLaptop() {
     };
 
     const updateScrollProgress = () => {
-      window.cancelAnimationFrame(animationFrame);
+      if (animationFrame) return;
       animationFrame = window.requestAnimationFrame(() => {
+        animationFrame = 0;
         if (!section.current) return;
+        updateSceneLayout();
         const bounds = section.current.getBoundingClientRect();
-        const scrollDistance = section.current.offsetHeight - window.innerHeight;
-        const progress =
-          THREE.MathUtils.clamp(scrollDistance > 0 ? -bounds.top / scrollDistance : 0, 0, 1) *
-          LAPTOP_STAGE_END;
+        const scrollVH = THREE.MathUtils.clamp(
+          (-bounds.top / window.innerHeight) * 100,
+          0,
+          LAPTOP_SCROLL_VH
+        );
+        const responseHoldVH = THREE.MathUtils.clamp(
+          scrollVH - ORIGINAL_SCROLL_VH * LAPTOP_DEMO_END,
+          0,
+          AI_RESPONSE_HOLD_SCROLL_VH
+        );
+        const progress = THREE.MathUtils.clamp(
+          (scrollVH - responseHoldVH) / ORIGINAL_SCROLL_VH,
+          0,
+          LAPTOP_STAGE_END
+        );
         const entrance = THREE.MathUtils.clamp(
           (window.innerHeight - bounds.top) / Math.max(window.innerHeight * 0.72, 1),
           0,
           1
         );
         const laptopProgress = THREE.MathUtils.clamp(progress / LAPTOP_FOCUS_END, 0, 1);
-        const retreat = THREE.MathUtils.clamp((progress - 0.58) / 0.14, 0, 1);
+        const retreat = THREE.MathUtils.clamp(
+          (progress - LAPTOP_DEMO_END) / LAPTOP_RETREAT_DURATION,
+          0,
+          1
+        );
         const videoBounds = videoSection.current?.getBoundingClientRect();
-        const videoScrollDistance = (videoSection.current?.offsetHeight ?? 0) - window.innerHeight;
-        const videoScrollProgress = THREE.MathUtils.clamp(
-          videoBounds && videoScrollDistance > 0 ? -videoBounds.top / videoScrollDistance : 0,
+        const videoScrollVH = videoBounds ? (-videoBounds.top / window.innerHeight) * 100 : 0;
+        const scrubProgress = THREE.MathUtils.clamp(
+          (videoScrollVH - VIDEO_LEAD_IN_SCROLL_VH) / VIDEO_SCRUB_SCROLL_VH,
           0,
           1
         );
@@ -655,12 +808,9 @@ export default function SolutionLaptop() {
           videoBounds.bottom > 1 &&
           videoHasFrame.current
         );
-        const videoTimelineProgress =
-          LAPTOP_STAGE_END + videoScrollProgress * (1 - LAPTOP_STAGE_END);
-        const scrubProgress = THREE.MathUtils.clamp((videoTimelineProgress - 0.8) / 0.2, 0, 1);
         scrollProgress.current = laptopProgress;
         demoProgress.current = THREE.MathUtils.clamp(
-          (progress - LAPTOP_FOCUS_END) / (0.58 - LAPTOP_FOCUS_END),
+          (progress - LAPTOP_FOCUS_END) / (LAPTOP_DEMO_END - LAPTOP_FOCUS_END),
           0,
           1
         );
@@ -681,44 +831,19 @@ export default function SolutionLaptop() {
         applyStudioColors(studioBackground.current);
         if (!videoActive) applyStudioColors(videoStudioBackground.current);
 
-        if (overhaulVideo.current) {
-          const video = overhaulVideo.current;
-          const frame = getOverhaulFrame(window.innerWidth, window.innerHeight);
-          for (const background of [studioBackground.current, videoStudioBackground.current]) {
-            if (!background) continue;
-            const frameTop = frame.centerY - frame.height / 2;
-            background.style.setProperty('--studio-top', `${frameTop}px`);
-            background.style.setProperty('--studio-quarter', `${frameTop + frame.height * 0.25}px`);
-            background.style.setProperty('--studio-middle', `${frameTop + frame.height * 0.5}px`);
-            background.style.setProperty('--studio-floor', `${frameTop + frame.height * 0.75}px`);
-            background.style.setProperty('--studio-bottom', `${frameTop + frame.height}px`);
-            background.style.setProperty('--studio-left', `${frame.centerX - frame.width / 2}px`);
-            background.style.setProperty('--studio-right', `${frame.centerX + frame.width / 2}px`);
-          }
-          video.style.width = `${frame.width}px`;
-          video.style.height = `${frame.height}px`;
-          video.style.left = `${frame.centerX}px`;
-          video.style.top = `${frame.centerY}px`;
-          if (Number.isFinite(video.duration) && video.duration > 0) {
-            const frameDuration = 1 / 24;
-            const availableDuration = Math.max(
-              video.duration - OVERHAUL_START_TIME - frameDuration,
-              0
-            );
-            const targetTime = Math.min(
-              Math.round(
-                (OVERHAUL_START_TIME + scrubProgress * availableDuration) / frameDuration
-              ) * frameDuration,
-              Math.max(video.duration - frameDuration, 0)
-            );
-            desiredVideoTime.current = targetTime;
-            if (!videoAnimationFrame && videoHasFrame.current) {
-              videoAnimationFrame = window.requestAnimationFrame(syncVideoFrame);
-            }
+        const video = overhaulVideo.current;
+        if (video && Number.isFinite(video.duration) && video.duration > 0) {
+          const availableDuration = Math.max(
+            video.duration - OVERHAUL_START_TIME - VIDEO_FRAME_DURATION,
+            0
+          );
+          desiredVideoTime.current = OVERHAUL_START_TIME + scrubProgress * availableDuration;
+          if (!videoAnimationFrame && videoHasFrame.current) {
+            videoAnimationFrame = window.requestAnimationFrame(syncVideoFrame);
           }
         }
 
-        if (groundShadow.current) {
+        if (groundShadow.current && bounds.top < window.innerHeight && bounds.bottom > 0) {
           groundShadow.current.style.opacity = String(
             Math.max(0, 0.28 * entrance * (1 - laptopProgress * 2.2) * (1 - retreat))
           );
@@ -743,7 +868,7 @@ export default function SolutionLaptop() {
       <div
         ref={section}
         className="relative w-full"
-        style={{ height: `${100 + ORIGINAL_SCROLL_VH * LAPTOP_STAGE_END}vh` }}
+        style={{ height: `${100 + LAPTOP_SCROLL_VH}vh` }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <StudioBackground backgroundRef={studioBackground} />
@@ -753,7 +878,10 @@ export default function SolutionLaptop() {
             className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
             style={{ opacity: 0, transform: 'translateX(-50%) scale(0.78)' }}
           />
-          <div className="absolute inset-0 z-10">
+          <div
+            className="absolute inset-0 z-10"
+            style={{ visibility: isVideoStage ? 'hidden' : 'visible' }}
+          >
             <Canvas
               aria-hidden="true"
               frameloop={isVideoStage ? 'never' : 'always'}
@@ -783,6 +911,10 @@ export default function SolutionLaptop() {
               motionEnabled={motionEnabled}
             />
           </Motion.aside>
+          <LaptopRetreatCopy
+            retreatProgress={laptopRetreatProgress}
+            motionEnabled={motionEnabled}
+          />
         </div>
       </div>
 
@@ -791,28 +923,49 @@ export default function SolutionLaptop() {
         aria-labelledby="on-premise-title"
         className="relative flex min-h-svh w-full items-center justify-center bg-[#fdfdfd] px-6 pt-[var(--site-header-height)] pb-16 text-center sm:px-8"
       >
-        <div className="mx-auto w-full max-w-[1280px]">
+        <Motion.div
+          className="mx-auto w-full max-w-[1280px]"
+          initial={shouldReduceMotion ? false : 'hidden'}
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.55 }}
+        >
           <h2
             id="on-premise-title"
             className="text-[clamp(2.5rem,5.8vw,6.6rem)] leading-[1.12] font-semibold tracking-[-0.06em] text-slate-950 [text-wrap:balance]"
           >
-            <span className="block">
-              기업의 <span className="text-[#0b5cff]">AI</span>를,
+            <span className="block overflow-hidden">
+              <Motion.span className="block" variants={introductionLineVariants} custom={0}>
+                기업의 <span className="text-[#0b5cff]">AI</span>를,
+              </Motion.span>
             </span>
-            <span className="mt-[0.08em] block">기업의 환경 안에.</span>
+            <span className="mt-[0.08em] block overflow-hidden">
+              <Motion.span className="block" variants={introductionLineVariants} custom={1}>
+                기업의 환경 안에.
+              </Motion.span>
+            </span>
           </h2>
           <p className="mt-8 text-[clamp(1rem,1.35vw,1.4rem)] leading-[1.7] font-medium tracking-[-0.02em] text-slate-600">
-            <span className="block">기업 환경에 맞춘 온프레미스 구축.</span>
-            <span className="block">필요한 모듈 도입부터 운영·업데이트까지.</span>
+            <span className="block overflow-hidden">
+              <Motion.span className="block" variants={introductionLineVariants} custom={2}>
+                기업 환경에 맞춘 온프레미스 구축.
+              </Motion.span>
+            </span>
+            <span className="block overflow-hidden">
+              <Motion.span className="block" variants={introductionLineVariants} custom={3}>
+                필요한 모듈 도입부터 운영·업데이트까지.
+              </Motion.span>
+            </span>
           </p>
-        </div>
+        </Motion.div>
       </section>
 
       <section
         ref={videoSection}
         aria-label="ONDAM AI 인프라 영상"
         className="relative w-full"
-        style={{ height: `${100 + ORIGINAL_SCROLL_VH * (1 - LAPTOP_STAGE_END)}vh` }}
+        style={{
+          height: `${100 + VIDEO_LEAD_IN_SCROLL_VH + VIDEO_SCRUB_SCROLL_VH + VIDEO_END_HOLD_SCROLL_VH}vh`,
+        }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden">
           <StudioBackground backgroundRef={videoStudioBackground} />
@@ -827,8 +980,8 @@ export default function SolutionLaptop() {
               muted
               playsInline
               preload="auto"
-              src="/videos/overhaul-scroll-intra.mp4"
-              className="absolute top-[51%] left-[37%] aspect-video w-[61vw] -translate-x-1/2 -translate-y-1/2 object-contain max-sm:top-1/2 max-sm:left-1/2 max-sm:w-[92vw]"
+              src="/videos/overhaul-scroll-smooth.mp4"
+              className="absolute top-[51%] left-[37%] aspect-video w-[53.68vw] -translate-x-1/2 -translate-y-1/2 object-contain max-sm:top-1/2 max-sm:left-1/2 max-sm:w-[80.96vw]"
               style={{
                 maskImage:
                   'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent), linear-gradient(to bottom, transparent, black 2px, black calc(100% - 14px), transparent)',
@@ -850,9 +1003,8 @@ export default function SolutionLaptop() {
               onLoadedMetadata={event => {
                 const video = event.currentTarget;
                 video.pause();
-                const frameDuration = 1 / 24;
                 const availableDuration = Math.max(
-                  video.duration - OVERHAUL_START_TIME - frameDuration,
+                  video.duration - OVERHAUL_START_TIME - VIDEO_FRAME_DURATION,
                   0
                 );
                 const targetTime = OVERHAUL_START_TIME + videoProgress.current * availableDuration;
@@ -862,6 +1014,31 @@ export default function SolutionLaptop() {
               }}
             />
           </div>
+
+          <aside
+            aria-labelledby="on-premise-deployment-title"
+            className="solution-stage-copy pointer-events-none absolute top-[55%] right-6 left-6 z-20"
+          >
+            <div className="mx-auto max-w-[560px] lg:max-w-none">
+              <h3
+                id="on-premise-deployment-title"
+                className="text-[clamp(1.5rem,1.75vw,2rem)] leading-[1.45] font-bold tracking-[-0.04em] text-balance break-keep text-slate-950 max-lg:text-xl [@media(max-height:640px)]:text-lg"
+              >
+                <span className="block">
+                  온담 AI는 <span className="text-[#0b5cff]">온프레미스</span>
+                  <span className="ml-1 text-[0.7em] font-medium tracking-[-0.02em] text-slate-500">
+                    (On-Premise)
+                  </span>{' '}
+                  방식으로
+                </span>
+                <span className="block">기업 내부에 직접 구축됩니다.</span>
+              </h3>
+              <p className="mt-6 text-[clamp(1rem,1.35vw,1.4rem)] leading-[1.7] font-medium tracking-[-0.02em] break-keep text-slate-600 max-lg:text-base [@media(max-height:640px)]:mt-3 [@media(max-height:640px)]:text-sm [@media(max-height:640px)]:leading-[1.65]">
+                <span className="block">기존 보안 체계에 맞춰 독립적으로 운영하며,</span>
+                <span className="block">서비스 접근 통제와 사용 이력을 통합 관리합니다.</span>
+              </p>
+            </div>
+          </aside>
         </div>
       </section>
     </>

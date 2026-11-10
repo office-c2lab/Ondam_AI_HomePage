@@ -55,6 +55,23 @@ a {
   text-decoration: none;
 }
 
+@media (min-width: 1024px) {
+  .solution-stage-copy {
+    /* Align the first lines using the five-line retreat caption's height. */
+    font-size: clamp(1.5rem, 1.75vw, 2rem);
+    top: calc(50% - 3.95em);
+    right: 2rem;
+    left: auto;
+    width: clamp(20rem, 28vw, 30rem);
+  }
+}
+
+@media (min-width: 1600px) {
+  .solution-stage-copy {
+    right: calc((100vw - 1600px) / 2);
+  }
+}
+
 @keyframes team-detail-drawer-in {
   from {
     transform: translate3d(48px, 0, 0);
