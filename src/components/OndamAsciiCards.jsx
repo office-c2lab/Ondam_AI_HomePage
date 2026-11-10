@@ -300,6 +300,17 @@ function AsciiCanvas({ type, rgb }) {
         const rotatedZ = -px * sinA + pz * cosA;
         const rotatedY = py * cosB - rotatedZ * sinB;
         const depth = py * sinB + rotatedZ * cosB;
+        if (type === 'discover' && point.type === 1 && depth < 0) {
+          // Preserve the front arc; mask the rear arc behind the sphere's silhouette.
+          const dz = depth - 3.9;
+          const rayLengthSquared = rotatedX ** 2 + rotatedY ** 2 + dz ** 2;
+          const cameraDotRay = 3.9 * dz;
+          const discriminant = cameraDotRay ** 2 - rayLengthSquared * (3.9 ** 2 - 0.9 ** 2);
+          if (discriminant > 0) {
+            const hit = (-cameraDotRay - Math.sqrt(discriminant)) / rayLengthSquared;
+            if (hit > 0 && hit < 1) continue;
+          }
+        }
         const projection = 3.1 / (3.9 - depth);
         const x = width * 0.5 + rotatedX * scale * projection * 0.56;
         const y = height * 0.5 + rotatedY * scale * projection * 0.55;
