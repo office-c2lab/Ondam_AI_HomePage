@@ -27,7 +27,6 @@ const AI_RESPONSE_HOLD_SCROLL_VH = 80;
 const LAPTOP_SCROLL_VH = ORIGINAL_SCROLL_VH * LAPTOP_STAGE_END + AI_RESPONSE_HOLD_SCROLL_VH;
 const VIDEO_LEAD_IN_SCROLL_VH = 24.8;
 const VIDEO_SCRUB_SCROLL_VH = 360;
-const VIDEO_END_HOLD_SCROLL_VH = 24;
 const OVERHAUL_START_TIME = 0;
 const OVERHAUL_VIDEO_FPS = 60;
 const VIDEO_FRAME_DURATION = 1 / OVERHAUL_VIDEO_FPS;
@@ -990,7 +989,7 @@ export default function SolutionLaptop() {
         aria-label="ONDAM AI 인프라 영상"
         className="relative w-full bg-white"
         style={{
-          height: `${100 + VIDEO_LEAD_IN_SCROLL_VH + VIDEO_SCRUB_SCROLL_VH + VIDEO_END_HOLD_SCROLL_VH}vh`,
+          height: `${100 + VIDEO_LEAD_IN_SCROLL_VH + VIDEO_SCRUB_SCROLL_VH}vh`,
         }}
       >
         <div className="sticky top-0 h-screen w-full overflow-hidden bg-white">

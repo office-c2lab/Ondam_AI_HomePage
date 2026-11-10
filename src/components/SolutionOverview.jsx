@@ -120,7 +120,6 @@ export default function SolutionOverview() {
       />
       <div className="mx-auto w-full max-w-[1600px]">
         <Motion.div className="text-center" {...reveal()}>
-          
           <h2
             id="solutions-title"
             className="mt-6 text-[clamp(2rem,4.4vw,4.75rem)] leading-[1.16] font-semibold tracking-[-0.06em] break-keep text-slate-950"
@@ -137,24 +136,19 @@ export default function SolutionOverview() {
 
         <Motion.div
           ref={characterRef}
-          className="relative mx-auto mt-1 flex h-[270px] max-w-[900px] items-center justify-center sm:mt-4 sm:h-[340px] lg:h-[380px]"
+          className="relative mx-auto mt-1 flex h-[340px] max-w-[900px] items-center justify-center sm:mt-4 sm:h-[425px] lg:h-[475px]"
           {...reveal(0.12)}
         >
           <div
-            aria-hidden="true"
-            className="pointer-events-none absolute top-1/2 left-1/2 h-[38%] w-[88%] -translate-x-1/2 -translate-y-1/2 rotate-[-14deg] rounded-[50%] border border-white/90 shadow-[0_0_18px_rgba(165,207,255,0.25)]"
-          />
-          <div
             role="img"
-            aria-label="미소 짓는 온담 AI 캐릭터"
-            className="pointer-events-none relative h-[340px] w-[340px] shrink-0 sm:h-[440px] sm:w-[440px] lg:h-[500px] lg:w-[500px]"
+            aria-label="온담 AI 캐릭터"
+            className="pointer-events-none relative h-[425px] w-[425px] shrink-0 sm:h-[550px] sm:w-[550px] lg:h-[625px] lg:w-[625px]"
           >
             {characterVisible && (
               <GamgikAgentOrbWithFace
                 size="100%"
-                speed={shouldReduceMotion ? 0 : 0.95}
-                motion={shouldReduceMotion ? 0 : 0.5}
-                expressionOverride="happy"
+                speed={shouldReduceMotion ? 0 : 8}
+                motion={shouldReduceMotion ? 0 : 0.68}
                 trackPointer={false}
                 doubleClickEnabled={false}
               />
