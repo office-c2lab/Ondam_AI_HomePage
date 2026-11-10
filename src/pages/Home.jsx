@@ -25,7 +25,7 @@ export default function Home() {
         };
 
   return (
-    <section id="platform" className="relative min-h-screen">
+    <section id="platform" className="relative min-h-screen bg-white">
       <section
         aria-labelledby="platform-title"
         className="relative flex min-h-svh items-center justify-center px-6 pt-[70px] pb-16 text-center min-[681px]:pt-[80px] min-[981px]:pt-[90px]"
@@ -104,7 +104,7 @@ export default function Home() {
       </section>
 
       <div id="platform-overview" className="w-full" aria-label="ONDAM AI 플랫폼 미리보기">
-        <section className="border-y border-slate-200 bg-white px-6 py-16 sm:px-8 sm:py-20 xl:hidden">
+        <section className="bg-white px-6 py-16 sm:px-8 sm:py-20 xl:hidden">
           <div className="mx-auto w-full max-w-3xl">
             <SolutionMenu compact />
           </div>

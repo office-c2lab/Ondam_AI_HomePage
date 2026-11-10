@@ -206,16 +206,21 @@ function DesktopSolutionMenu({ scrollProgress, motionEnabled }) {
   );
 }
 
-function LaptopRetreatCopy({ retreatProgress, motionEnabled }) {
-  const opacity = useTransform(retreatProgress, [0.84, 1], [0, 1]);
-  const x = useTransform(retreatProgress, [0.84, 1], [24, 0]);
+function useSolutionCopyReveal(progress, motionEnabled, start, end) {
+  const opacity = useTransform(progress, [start, end], [0, 1]);
+  const x = useTransform(progress, [start, end], [24, 0]);
   const visibility = useTransform(opacity, value => (value <= 0.01 ? 'hidden' : 'visible'));
+  return { opacity, visibility, x: motionEnabled ? x : 0 };
+}
+
+function LaptopRetreatCopy({ retreatProgress, motionEnabled }) {
+  const revealStyle = useSolutionCopyReveal(retreatProgress, motionEnabled, 0.84, 1);
 
   return (
     <Motion.aside
       aria-labelledby="laptop-retreat-title"
       className="solution-stage-copy pointer-events-none absolute z-20 hidden xl:block"
-      style={{ opacity, visibility, x: motionEnabled ? x : 0 }}
+      style={revealStyle}
     >
       <h3
         id="laptop-retreat-title"
@@ -595,6 +600,10 @@ function StudioBackground({ backgroundRef }) {
         '--studio-bottom': '79vh',
         '--studio-left': '6.5vw',
         '--studio-right': '67.5vw',
+        maskImage:
+          'linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)',
+        WebkitMaskImage:
+          'linear-gradient(to bottom, transparent 0%, black 18%, black 82%, transparent 100%)',
         background:
           'linear-gradient(to bottom, #fdfdfd 0px, #fdfdfd var(--studio-quarter), #f7fafc var(--studio-middle), #eff6f9 var(--studio-floor), #f0f7fa var(--studio-bottom))',
       }}
@@ -638,6 +647,16 @@ export default function SolutionLaptop() {
     target: section,
     offset: ['start start', 'end end'],
   });
+  const { scrollYProgress: videoEntranceProgress } = useScroll({
+    target: videoSection,
+    offset: ['start end', 'start start'],
+  });
+  const videoCopyRevealStyle = useSolutionCopyReveal(
+    videoEntranceProgress,
+    motionEnabled,
+    0.45,
+    0.8
+  );
   const laptopFocusProgress = useTransform(
     scrollYProgress,
     [0, (ORIGINAL_SCROLL_VH * LAPTOP_FOCUS_END) / LAPTOP_SCROLL_VH],
@@ -867,10 +886,10 @@ export default function SolutionLaptop() {
     <>
       <div
         ref={section}
-        className="relative w-full"
+        className="relative w-full bg-white"
         style={{ height: `${100 + LAPTOP_SCROLL_VH}vh` }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-white">
           <StudioBackground backgroundRef={studioBackground} />
           <div
             ref={groundShadow}
@@ -921,7 +940,7 @@ export default function SolutionLaptop() {
       <section
         id="solution-transition"
         aria-labelledby="on-premise-title"
-        className="relative flex min-h-svh w-full items-center justify-center bg-[#fdfdfd] px-6 pt-[var(--site-header-height)] pb-16 text-center sm:px-8"
+        className="relative flex min-h-svh w-full items-center justify-center bg-white px-6 pt-[var(--site-header-height)] pb-16 text-center sm:px-8"
       >
         <Motion.div
           className="mx-auto w-full max-w-[1280px]"
@@ -962,12 +981,12 @@ export default function SolutionLaptop() {
       <section
         ref={videoSection}
         aria-label="ONDAM AI 인프라 영상"
-        className="relative w-full"
+        className="relative w-full bg-white"
         style={{
           height: `${100 + VIDEO_LEAD_IN_SCROLL_VH + VIDEO_SCRUB_SCROLL_VH + VIDEO_END_HOLD_SCROLL_VH}vh`,
         }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden">
+        <div className="sticky top-0 h-screen w-full overflow-hidden bg-white">
           <StudioBackground backgroundRef={videoStudioBackground} />
           <div
             ref={videoLayer}
@@ -1015,9 +1034,10 @@ export default function SolutionLaptop() {
             />
           </div>
 
-          <aside
+          <Motion.aside
             aria-labelledby="on-premise-deployment-title"
             className="solution-stage-copy pointer-events-none absolute top-[55%] right-6 left-6 z-20"
+            style={videoCopyRevealStyle}
           >
             <div className="mx-auto max-w-[560px] lg:max-w-none">
               <h3
@@ -1038,7 +1058,7 @@ export default function SolutionLaptop() {
                 <span className="block">서비스 접근 통제와 사용 이력을 통합 관리합니다.</span>
               </p>
             </div>
-          </aside>
+          </Motion.aside>
         </div>
       </section>
     </>
