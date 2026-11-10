@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { motion as Motion, useReducedMotion } from 'motion/react';
 
 // Adapted from the supplied OndamAsciiCards.jsx for the four solution detail links.
@@ -47,20 +47,55 @@ function generatePoints(kind) {
   const seeds = { discover: 11, 'control-internal': 23, 'control-external': 31, manage: 37 };
   const random = makeRandom(seeds[kind]);
   const points = [];
-  const add = (x, y, z, type = 0, group = 0) => points.push({ x, y, z, type, group });
-  const line = (from, to, type = 1) => {
+  const add = (x, y, z, type = 0, group = 0, style) =>
+    points.push({ x, y, z, type, group, ...style });
+  const line = (from, to, type = 1, style) => {
     const steps = Math.max(
       2,
       Math.ceil(Math.hypot(...to.map((value, i) => value - from[i])) / 0.04)
     );
     for (let i = 0; i <= steps; i++) {
       const u = i / steps;
-      add(...from.map((value, axis) => value + (to[axis] - value) * u), type);
+      add(...from.map((value, axis) => value + (to[axis] - value) * u), type, 0, style);
     }
   };
   const flow = (from, to, count, blocked = false) => {
     for (let i = 0; i < count; i++) {
       points.push({ x: 0, y: 0, z: 0, type: 4, from, to, phase: i / count, blocked });
+    }
+  };
+  const roundedRect = (cx, cy, halfWidth, halfHeight, radius, z, style) => {
+    line(
+      [cx - halfWidth + radius, cy - halfHeight, z],
+      [cx + halfWidth - radius, cy - halfHeight, z],
+      1,
+      style
+    );
+    line(
+      [cx + halfWidth, cy - halfHeight + radius, z],
+      [cx + halfWidth, cy + halfHeight - radius, z],
+      1,
+      style
+    );
+    line(
+      [cx + halfWidth - radius, cy + halfHeight, z],
+      [cx - halfWidth + radius, cy + halfHeight, z],
+      1,
+      style
+    );
+    line(
+      [cx - halfWidth, cy + halfHeight - radius, z],
+      [cx - halfWidth, cy - halfHeight + radius, z],
+      1,
+      style
+    );
+    for (let corner = 0; corner < 4; corner++) {
+      const centerX = cx + (corner < 2 ? 1 : -1) * (halfWidth - radius);
+      const centerY = cy + (corner === 0 || corner === 3 ? -1 : 1) * (halfHeight - radius);
+      for (let i = 0; i <= 7; i++) {
+        const angle = -Math.PI / 2 + (corner * Math.PI) / 2 + ((i / 7) * Math.PI) / 2;
+        add(centerX + Math.cos(angle) * radius, centerY + Math.sin(angle) * radius, z, 1, 0, style);
+      }
     }
   };
 
@@ -87,50 +122,65 @@ function generatePoints(kind) {
       add(Math.cos(a) * r, (random() - 0.5) * 1.45, Math.sin(a) * r, 2);
     }
   } else if (kind === 'control-internal') {
-    // A central AI processor connects the enterprise's internal services.
-    for (const z of [-0.12, 0.12]) {
-      for (let row = 0; row <= 12; row++) {
-        for (let col = 0; col <= 12; col++) {
-          add(-0.43 + (col / 12) * 0.86, -0.51 + (row / 12) * 0.86, z);
+    // Three server chassis, front drive slots and status lights on a plinth.
+    const outline = { glyph: '+', opacity: 0.85 };
+    const frontNormal = [0, 0, 1];
+    for (const y of [-0.6, -0.08, 0.44]) {
+      for (let row = -4; row <= 4; row++) {
+        for (let col = -20; col <= 20; col++) {
+          for (const side of [-1, 1]) {
+            add(col * 0.03, y + row * 0.03, side * 0.36, 0, 0, {
+              opacity: side === 1 ? 0.6 : 0.5,
+              normal: [0, 0, side],
+            });
+          }
+        }
+        for (let depth = -10; depth <= 10; depth++) {
+          for (const side of [-1, 1]) {
+            add(side * 0.68, y + row * 0.025, depth * 0.03, 0, 0, {
+              opacity: 0.5,
+              normal: [side, 0, 0],
+            });
+          }
         }
       }
-      line([-0.43, -0.51, z], [0.43, -0.51, z]);
-      line([0.43, -0.51, z], [0.43, 0.35, z]);
-      line([0.43, 0.35, z], [-0.43, 0.35, z]);
-      line([-0.43, 0.35, z], [-0.43, -0.51, z]);
-    }
-    for (let i = 0; i < 7; i++) {
-      const offset = -0.32 + (i / 6) * 0.64;
+      for (let col = -20; col <= 20; col++) {
+        for (let depth = -10; depth <= 10; depth++) {
+          add(col * 0.03, y - 0.19, depth * 0.03, 0, 0, {
+            opacity: 0.45,
+            normal: [0, -1, 0],
+          });
+        }
+      }
+      for (const z of [-0.36, 0.36]) roundedRect(0, y, 0.68, 0.19, 0.08, z, outline);
       for (const side of [-1, 1]) {
-        line([side * 0.44, offset - 0.08, 0], [side * 0.59, offset - 0.08, 0]);
-        line([offset, -0.08 + side * 0.44, 0], [offset, -0.08 + side * 0.59, 0]);
+        for (const dy of [-0.11, 0.11])
+          line([side * 0.68, y + dy, -0.36], [side * 0.68, y + dy, 0.36], 1, outline);
+        line([side * 0.6, y - 0.19, -0.36], [side * 0.6, y - 0.19, 0.36], 1, outline);
+        line([side * 0.6, y + 0.19, -0.36], [side * 0.6, y + 0.19, 0.36], 1, outline);
+      }
+      roundedRect(-0.22, y, 0.24, 0.04, 0.025, 0.39, {
+        glyph: '=',
+        opacity: 0.95,
+        normal: frontNormal,
+      });
+      for (let i = 0; i < 28; i++) {
+        const angle = (i / 28) * Math.PI * 2;
+        add(0.43 + Math.cos(angle) * 0.065, y + Math.sin(angle) * 0.065, 0.39, 1, 0, {
+          glyph: '·',
+          opacity: 1,
+          normal: frontNormal,
+        });
+      }
+      add(0.43, y, 0.4, 0, 0, { glyph: '@', opacity: 0.8, normal: frontNormal });
+    }
+    for (const z of [-0.46, 0.46]) roundedRect(0, 0.82, 0.8, 0.065, 0.04, z, outline);
+    for (const x of [-0.76, 0.76]) line([x, 0.755, -0.46], [x, 0.755, 0.46], 1, outline);
+    for (let col = -14; col <= 14; col++) {
+      for (let depth = -8; depth <= 8; depth++) {
+        add(col * 0.05, 0.755, depth * 0.05, 0, 0, { opacity: 0.45, normal: [0, -1, 0] });
       }
     }
-    const endpoints = [
-      [-1.12, -0.68, 0.1],
-      [1.12, -0.68, -0.1],
-      [-1.12, 0.5, -0.08],
-      [1.12, 0.5, 0.08],
-      [0, -1.08, -0.08],
-      [0, 0.93, 0.08],
-    ];
-    endpoints.forEach((node, index) => {
-      const edge = node.map((value, axis) =>
-        axis === 1 ? -0.08 + (value + 0.08) * 0.49 : value * 0.49
-      );
-      line(edge, node, 2);
-      flow(index % 2 ? edge : node, index % 2 ? node : edge, 10);
-      for (let i = 0; i < 90; i++) {
-        const y = 1 - (2 * (i + 0.5)) / 90;
-        const radius = Math.sqrt(1 - y * y);
-        const angle = i * Math.PI * (3 - Math.sqrt(5));
-        add(
-          node[0] + Math.cos(angle) * radius * 0.14,
-          node[1] + y * 0.14,
-          node[2] + Math.sin(angle) * radius * 0.14
-        );
-      }
-    });
   } else if (kind === 'control-external') {
     // An inspection gateway filters the traffic crossing the enterprise boundary.
     for (let ring = 0; ring < 168; ring++) {
@@ -257,9 +307,12 @@ function AsciiCanvas({ type, rgb }) {
       }
 
       let angle = t * 0.16 + pointer.x * 0.7 + 0.32;
-      if (type === 'control-internal') angle = 0.3 + Math.sin(t * 0.3) * 0.16 + pointer.x * 0.38;
+      if (type === 'control-internal') angle = t * 0.16 + pointer.x * 0.7 - 0.45;
       if (type === 'control-external') angle = 0.75 + Math.sin(t * 0.3) * 0.12 + pointer.x * 0.3;
-      const tilt = Math.sin(t * 0.34) * 0.1 + pointer.y * 0.35;
+      const tilt =
+        type === 'control-internal'
+          ? -0.22 + Math.sin(t * 0.3) * 0.04 + pointer.y * 0.15
+          : Math.sin(t * 0.34) * 0.1 + pointer.y * 0.35;
       const cosA = Math.cos(angle),
         sinA = Math.sin(angle);
       const cosB = Math.cos(tilt),
@@ -275,7 +328,7 @@ function AsciiCanvas({ type, rgb }) {
         let px = point.x;
         let py = point.y;
         let pz = point.z;
-        let glyph = null;
+        let glyph = point.glyph ?? null;
 
         if (type === 'discover') {
           py += Math.sin(t * 0.75 + px * 4) * 0.024;
@@ -300,6 +353,14 @@ function AsciiCanvas({ type, rgb }) {
         const rotatedZ = -px * sinA + pz * cosA;
         const rotatedY = py * cosB - rotatedZ * sinB;
         const depth = py * sinB + rotatedZ * cosB;
+        if (point.normal) {
+          const [nx, ny, nz] = point.normal;
+          const normalX = nx * cosA + nz * sinA;
+          const normalZ = -nx * sinA + nz * cosA;
+          const normalY = ny * cosB - normalZ * sinB;
+          const normalDepth = ny * sinB + normalZ * cosB;
+          if (-normalX * rotatedX - normalY * rotatedY + normalDepth * (3.9 - depth) <= 0) continue;
+        }
         if (type === 'discover' && point.type === 1 && depth < 0) {
           // Preserve the front arc; mask the rear arc behind the sphere's silhouette.
           const dz = depth - 3.9;
@@ -322,9 +383,11 @@ function AsciiCanvas({ type, rgb }) {
           0,
           Math.min(CHARS.length - 1, Math.floor((light + shimmer) * CHARS.length))
         );
-        const alpha = glyph
-          ? 0.9
-          : (0.24 + light * 0.72) * (point.type === 3 ? 0.55 : point.type === 1 ? 0.82 : 1);
+        const alpha =
+          point.opacity ??
+          (glyph
+            ? 0.9
+            : (0.24 + light * 0.72) * (point.type === 3 ? 0.55 : point.type === 1 ? 0.82 : 1));
         ctx.fillStyle = `rgba(${rgb},${alpha})`;
         ctx.fillText(glyph ?? CHARS[glyphIndex], x, y);
       }
@@ -441,10 +504,31 @@ function IdentityCard({ item, index, shouldReduceMotion }) {
 
 export default function OndamAsciiCards() {
   const shouldReduceMotion = useReducedMotion();
+  const gridRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const descriptions = [...grid.querySelectorAll('.identity-card__content p')];
+    const updateDescriptionHeight = () => {
+      const height = Math.max(
+        ...descriptions.map(element => element.getBoundingClientRect().height)
+      );
+      const value = `${height}px`;
+      if (grid.style.getPropertyValue('--description-height') !== value) {
+        grid.style.setProperty('--description-height', value);
+      }
+    };
+    const observer = new ResizeObserver(updateDescriptionHeight);
+    descriptions.forEach(element => observer.observe(element));
+    updateDescriptionHeight();
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <section className="ondam-ascii-section" aria-label="온담AI 핵심 솔루션">
       <div className="ondam-ascii-container">
-        <div className="identity-grid">
+        <div ref={gridRef} className="identity-grid">
           {CONFIG.map((item, index) => (
             <IdentityCard
               key={item.id}
@@ -477,10 +561,10 @@ const STYLES = `
 .ondam-ascii-section .identity-card:focus-visible { outline: 2px solid var(--card-accent); outline-offset: 4px; }
 .ondam-ascii-section .identity-card__top { padding: 28px 28px 0; position: relative; z-index: 1; }
 .ondam-ascii-section .identity-card__title { margin: 0; color: #020617; font-size: clamp(20px,1.45vw,26px); font-weight: 600; line-height: 1.35; letter-spacing: -.035em; }
-.ondam-ascii-section .identity-card__visual { position: absolute; inset: 0; z-index: -1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 45%, transparent 74%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 45%, transparent 74%); }
+.ondam-ascii-section .identity-card__visual { position: absolute; inset: 0; z-index: -1; overflow: hidden; mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 60%, transparent 82%); -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 10%, black 60%, transparent 82%); }
 .ondam-ascii-section .identity-card__visual::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(to right, rgba(11,92,255,.045) 1px, transparent 1px), linear-gradient(to bottom, rgba(11,92,255,.045) 1px, transparent 1px); background-size: 12px 12px; mask-image: radial-gradient(ellipse, black, transparent 80%); }
 .ondam-ascii-section .ascii-canvas { position: relative; display: block; width: 100%; height: 100%; cursor: pointer; }
-.ondam-ascii-section .identity-card__content { position: relative; margin-top: auto; padding: 170px 28px 28px; pointer-events: none; }
+.ondam-ascii-section .identity-card__content { position: relative; margin-top: auto; min-height: calc(var(--description-height, 0px) + 24px); padding: 0 28px 24px; pointer-events: none; }
 .ondam-ascii-section .identity-card__content p { margin: 0; font-size: clamp(16px,1.05vw,18px); line-height: 1.75; font-weight: 500; color: #475569; letter-spacing: -.025em; word-break: keep-all; text-wrap: pretty; }
 @media (max-width: 1279px) {
   .ondam-ascii-section .identity-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
