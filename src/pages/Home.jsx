@@ -1,6 +1,7 @@
 import { ChevronDown } from 'lucide-react';
 import { motion as Motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
 import SolutionLaptop, { SolutionMenu } from '../components/SolutionLaptop.jsx';
+import SolutionOverview from '../components/SolutionOverview.jsx';
 
 export default function Home() {
   const shouldReduceMotion = useReducedMotion();
@@ -111,6 +112,7 @@ export default function Home() {
         </section>
         <SolutionLaptop />
       </div>
+      <SolutionOverview />
     </section>
   );
 }

@@ -1,7 +1,13 @@
 import { Suspense, useEffect, useMemo, useRef, useState } from 'react';
 import { Html } from '@react-three/drei';
 import { Canvas, useFrame, useLoader } from '@react-three/fiber';
-import { motion as Motion, useReducedMotion, useScroll, useTransform } from 'motion/react';
+import {
+  motion as Motion,
+  useInView,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+} from 'motion/react';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import overhaulBackgroundFrames from './overhaulBackgroundFrames.json';
@@ -643,6 +649,7 @@ export default function SolutionLaptop() {
   const videoStageActive = useRef(false);
   const [isVideoStage, setIsVideoStage] = useState(false);
   const [motionEnabled, setMotionEnabled] = useState(true);
+  const isLaptopVisible = useInView(section, { margin: '120px' });
   const { scrollYProgress } = useScroll({
     target: section,
     offset: ['start start', 'end end'],
@@ -903,7 +910,7 @@ export default function SolutionLaptop() {
           >
             <Canvas
               aria-hidden="true"
-              frameloop={isVideoStage ? 'never' : 'always'}
+              frameloop={isVideoStage || !isLaptopVisible ? 'never' : 'always'}
               camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
               dpr={[1, 1.65]}
               gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
