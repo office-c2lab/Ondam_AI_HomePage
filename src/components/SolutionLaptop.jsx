@@ -11,6 +11,10 @@ const PORTFOLIO_LOOK_AT_START = [14, 3, 0];
 const DISPLAY_WORLD_CENTER = [0, 8.72, -10.2];
 const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 14];
 const FOCUSED_CAMERA_MOBILE = [0, 8.72, 26];
+const LAPTOP_FOCUS_END = 0.24;
+const SOLUTION_MENU_EXIT_END = 0.64;
+const LAPTOP_STAGE_END = 0.76;
+const ORIGINAL_SCROLL_VH = 620;
 const OVERHAUL_START_TIME = 0;
 // Fitted to the six outer corners in overhaul-scroll.mp4's first frame.
 const OVERHAUL_CAMERA = [-36.51703, -0.75835, 48.66409];
@@ -105,9 +109,10 @@ export function SolutionMenu({ compact = false }) {
 }
 
 function AnimatedSolutionLink({ label, href, index, scrollProgress, motionEnabled }) {
-  const exitStart = 0.13 + index * 0.06;
-  const opacity = useTransform(scrollProgress, [exitStart, exitStart + 0.08], [1, 0]);
-  const x = useTransform(scrollProgress, [exitStart, exitStart + 0.08], [0, 42]);
+  const exitStart = 0.16 + index * 0.1;
+  const opacity = useTransform(scrollProgress, [exitStart, exitStart + 0.18], [1, 0]);
+  const x = useTransform(scrollProgress, [exitStart, exitStart + 0.18], [0, 32]);
+  const visibility = useTransform(opacity, value => (value <= 0.01 ? 'hidden' : 'visible'));
 
   return (
     <Motion.div
@@ -119,7 +124,7 @@ function AnimatedSolutionLink({ label, href, index, scrollProgress, motionEnable
       <Motion.a
         href={href}
         className="group flex items-center justify-between py-[18px] text-left text-[clamp(0.95rem,0.95vw,1.1rem)] font-semibold tracking-[-0.025em] text-slate-700 transition-[color,padding] duration-300 hover:pl-2 hover:text-[#0b5cff]"
-        style={{ opacity, x: motionEnabled ? x : 0 }}
+        style={{ opacity, visibility, x: motionEnabled ? x : 0 }}
       >
         <span>{label}</span>
         <span
@@ -134,8 +139,8 @@ function AnimatedSolutionLink({ label, href, index, scrollProgress, motionEnable
 }
 
 function DesktopSolutionMenu({ scrollProgress, motionEnabled }) {
-  const titleOpacity = useTransform(scrollProgress, [0.07, 0.15], [1, 0]);
-  const titleX = useTransform(scrollProgress, [0.07, 0.15], [0, 42]);
+  const titleOpacity = useTransform(scrollProgress, [0.06, 0.2], [1, 0]);
+  const titleX = useTransform(scrollProgress, [0.06, 0.2], [0, 32]);
 
   return (
     <div>
@@ -515,9 +520,44 @@ function LaptopModel({
   );
 }
 
+function StudioBackground({ backgroundRef }) {
+  return (
+    <div
+      ref={backgroundRef}
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+      style={{
+        '--studio-top': '24vh',
+        '--studio-quarter': '38vh',
+        '--studio-middle': '52vh',
+        '--studio-floor': '66vh',
+        '--studio-bottom': '79vh',
+        '--studio-left': '6.5vw',
+        '--studio-right': '67.5vw',
+        background:
+          'linear-gradient(to bottom, #fdfdfd 0px, #fdfdfd var(--studio-quarter), #f7fafc var(--studio-middle), #eff6f9 var(--studio-floor), #f0f7fa var(--studio-bottom))',
+      }}
+    >
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            'linear-gradient(to bottom, #fdfdfd 0px, #fdfdfd var(--studio-top), #f5fbfc var(--studio-quarter), #eef5fa var(--studio-middle), #e2edf9 var(--studio-floor), #e2ecfb var(--studio-bottom))',
+          maskImage:
+            'linear-gradient(to right, transparent var(--studio-left), black var(--studio-right))',
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent var(--studio-left), black var(--studio-right))',
+        }}
+      />
+    </div>
+  );
+}
+
 export default function SolutionLaptop() {
   const section = useRef(null);
+  const videoSection = useRef(null);
   const studioBackground = useRef(null);
+  const videoStudioBackground = useRef(null);
   const groundShadow = useRef(null);
   const videoLayer = useRef(null);
   const overhaulVideo = useRef(null);
@@ -536,7 +576,14 @@ export default function SolutionLaptop() {
     target: section,
     offset: ['start start', 'end end'],
   });
-  const menuPointerEvents = useTransform(scrollYProgress, value => (value > 0.4 ? 'none' : 'auto'));
+  const laptopFocusProgress = useTransform(
+    scrollYProgress,
+    [0, LAPTOP_FOCUS_END / LAPTOP_STAGE_END],
+    [0, 1]
+  );
+  const menuPointerEvents = useTransform(laptopFocusProgress, value =>
+    value >= SOLUTION_MENU_EXIT_END ? 'none' : 'auto'
+  );
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -585,22 +632,38 @@ export default function SolutionLaptop() {
         if (!section.current) return;
         const bounds = section.current.getBoundingClientRect();
         const scrollDistance = section.current.offsetHeight - window.innerHeight;
-        const progress = THREE.MathUtils.clamp(
-          scrollDistance > 0 ? -bounds.top / scrollDistance : 0,
-          0,
-          1
-        );
+        const progress =
+          THREE.MathUtils.clamp(scrollDistance > 0 ? -bounds.top / scrollDistance : 0, 0, 1) *
+          LAPTOP_STAGE_END;
         const entrance = THREE.MathUtils.clamp(
           (window.innerHeight - bounds.top) / Math.max(window.innerHeight * 0.72, 1),
           0,
           1
         );
-        const laptopProgress = THREE.MathUtils.clamp(progress / 0.24, 0, 1);
+        const laptopProgress = THREE.MathUtils.clamp(progress / LAPTOP_FOCUS_END, 0, 1);
         const retreat = THREE.MathUtils.clamp((progress - 0.58) / 0.14, 0, 1);
-        const videoActive = progress >= 0.76 && videoHasFrame.current;
-        const scrubProgress = THREE.MathUtils.clamp((progress - 0.8) / 0.2, 0, 1);
+        const videoBounds = videoSection.current?.getBoundingClientRect();
+        const videoScrollDistance = (videoSection.current?.offsetHeight ?? 0) - window.innerHeight;
+        const videoScrollProgress = THREE.MathUtils.clamp(
+          videoBounds && videoScrollDistance > 0 ? -videoBounds.top / videoScrollDistance : 0,
+          0,
+          1
+        );
+        const videoActive = Boolean(
+          videoBounds &&
+          videoBounds.top < window.innerHeight - 1 &&
+          videoBounds.bottom > 1 &&
+          videoHasFrame.current
+        );
+        const videoTimelineProgress =
+          LAPTOP_STAGE_END + videoScrollProgress * (1 - LAPTOP_STAGE_END);
+        const scrubProgress = THREE.MathUtils.clamp((videoTimelineProgress - 0.8) / 0.2, 0, 1);
         scrollProgress.current = laptopProgress;
-        demoProgress.current = THREE.MathUtils.clamp((progress - 0.24) / 0.34, 0, 1);
+        demoProgress.current = THREE.MathUtils.clamp(
+          (progress - LAPTOP_FOCUS_END) / (0.58 - LAPTOP_FOCUS_END),
+          0,
+          1
+        );
         entryProgress.current = entrance;
         retreatProgress.current = retreat;
         videoProgress.current = scrubProgress;
@@ -611,39 +674,26 @@ export default function SolutionLaptop() {
         if (videoStageActive.current !== videoActive) {
           videoStageActive.current = videoActive;
           setIsVideoStage(videoActive);
+          if (videoActive) {
+            applyStudioColors(videoStudioBackground.current, overhaulVideo.current.currentTime);
+          }
         }
-        if (!videoActive) applyStudioColors(studioBackground.current);
+        applyStudioColors(studioBackground.current);
+        if (!videoActive) applyStudioColors(videoStudioBackground.current);
 
         if (overhaulVideo.current) {
           const video = overhaulVideo.current;
           const frame = getOverhaulFrame(window.innerWidth, window.innerHeight);
-          if (studioBackground.current) {
+          for (const background of [studioBackground.current, videoStudioBackground.current]) {
+            if (!background) continue;
             const frameTop = frame.centerY - frame.height / 2;
-            studioBackground.current.style.setProperty('--studio-top', `${frameTop}px`);
-            studioBackground.current.style.setProperty(
-              '--studio-quarter',
-              `${frameTop + frame.height * 0.25}px`
-            );
-            studioBackground.current.style.setProperty(
-              '--studio-middle',
-              `${frameTop + frame.height * 0.5}px`
-            );
-            studioBackground.current.style.setProperty(
-              '--studio-floor',
-              `${frameTop + frame.height * 0.75}px`
-            );
-            studioBackground.current.style.setProperty(
-              '--studio-bottom',
-              `${frameTop + frame.height}px`
-            );
-            studioBackground.current.style.setProperty(
-              '--studio-left',
-              `${frame.centerX - frame.width / 2}px`
-            );
-            studioBackground.current.style.setProperty(
-              '--studio-right',
-              `${frame.centerX + frame.width / 2}px`
-            );
+            background.style.setProperty('--studio-top', `${frameTop}px`);
+            background.style.setProperty('--studio-quarter', `${frameTop + frame.height * 0.25}px`);
+            background.style.setProperty('--studio-middle', `${frameTop + frame.height * 0.5}px`);
+            background.style.setProperty('--studio-floor', `${frameTop + frame.height * 0.75}px`);
+            background.style.setProperty('--studio-bottom', `${frameTop + frame.height}px`);
+            background.style.setProperty('--studio-left', `${frame.centerX - frame.width / 2}px`);
+            background.style.setProperty('--studio-right', `${frame.centerX + frame.width / 2}px`);
           }
           video.style.width = `${frame.width}px`;
           video.style.height = `${frame.height}px`;
@@ -689,118 +739,132 @@ export default function SolutionLaptop() {
   }, []);
 
   return (
-    <div ref={section} className="relative h-[720vh] w-full">
-      <div className="sticky top-0 h-screen w-full overflow-hidden">
-        <div
-          ref={studioBackground}
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{
-            '--studio-top': '24vh',
-            '--studio-quarter': '38vh',
-            '--studio-middle': '52vh',
-            '--studio-floor': '66vh',
-            '--studio-bottom': '79vh',
-            '--studio-left': '6.5vw',
-            '--studio-right': '67.5vw',
-            background:
-              'linear-gradient(to bottom, #fdfdfd 0px, #fdfdfd var(--studio-quarter), #f7fafc var(--studio-middle), #eff6f9 var(--studio-floor), #f0f7fa var(--studio-bottom))',
-          }}
-        >
+    <>
+      <div
+        ref={section}
+        className="relative w-full"
+        style={{ height: `${100 + ORIGINAL_SCROLL_VH * LAPTOP_STAGE_END}vh` }}
+      >
+        <div className="sticky top-0 h-screen w-full overflow-hidden">
+          <StudioBackground backgroundRef={studioBackground} />
           <div
-            className="absolute inset-0"
-            style={{
-              background:
-                'linear-gradient(to bottom, #fdfdfd 0px, #fdfdfd var(--studio-top), #f5fbfc var(--studio-quarter), #eef5fa var(--studio-middle), #e2edf9 var(--studio-floor), #e2ecfb var(--studio-bottom))',
-              maskImage:
-                'linear-gradient(to right, transparent var(--studio-left), black var(--studio-right))',
-              WebkitMaskImage:
-                'linear-gradient(to right, transparent var(--studio-left), black var(--studio-right))',
-            }}
-          />
-        </div>
-        <div
-          ref={groundShadow}
-          aria-hidden="true"
-          className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
-          style={{ opacity: 0, transform: 'translateX(-50%) scale(0.78)' }}
-        />
-        <div className="absolute inset-0 z-10">
-          <Canvas
+            ref={groundShadow}
             aria-hidden="true"
-            frameloop={isVideoStage ? 'never' : 'always'}
-            camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
-            dpr={[1, 1.65]}
-            gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
-          >
-            <Suspense fallback={null}>
-              <LaptopModel
-                motionEnabled={motionEnabled}
-                scrollProgress={scrollProgress}
-                entryProgress={entryProgress}
-                demoProgress={demoProgress}
-                retreatProgress={retreatProgress}
-              />
-            </Suspense>
-          </Canvas>
-        </div>
-
-        <div
-          ref={videoLayer}
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-[15]"
-          style={{ visibility: 'hidden' }}
-        >
-          <video
-            ref={overhaulVideo}
-            muted
-            playsInline
-            preload="auto"
-            src="/videos/overhaul-scroll-intra.mp4"
-            className="absolute top-[51%] left-[37%] aspect-video w-[61vw] -translate-x-1/2 -translate-y-1/2 object-contain max-sm:top-1/2 max-sm:left-1/2 max-sm:w-[92vw]"
-            style={{
-              maskImage:
-                'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent), linear-gradient(to bottom, transparent, black 2px, black calc(100% - 14px), transparent)',
-              maskComposite: 'intersect',
-              WebkitMaskImage:
-                'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent), linear-gradient(to bottom, transparent, black 2px, black calc(100% - 14px), transparent)',
-              WebkitMaskComposite: 'source-in',
-            }}
-            onLoadedData={() => {
-              if (videoHasFrame.current) return;
-              videoHasFrame.current = true;
-              window.dispatchEvent(new Event('scroll'));
-            }}
-            onSeeked={event => {
-              if (videoStageActive.current) {
-                applyStudioColors(studioBackground.current, event.currentTarget.currentTime);
-              }
-            }}
-            onLoadedMetadata={event => {
-              const video = event.currentTarget;
-              video.pause();
-              const frameDuration = 1 / 24;
-              const availableDuration = Math.max(
-                video.duration - OVERHAUL_START_TIME - frameDuration,
-                0
-              );
-              const targetTime = OVERHAUL_START_TIME + videoProgress.current * availableDuration;
-              desiredVideoTime.current = targetTime;
-              video.currentTime = targetTime;
-              lastVideoTime.current = targetTime;
-            }}
+            className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
+            style={{ opacity: 0, transform: 'translateX(-50%) scale(0.78)' }}
           />
-        </div>
+          <div className="absolute inset-0 z-10">
+            <Canvas
+              aria-hidden="true"
+              frameloop={isVideoStage ? 'never' : 'always'}
+              camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
+              dpr={[1, 1.65]}
+              gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+            >
+              <Suspense fallback={null}>
+                <LaptopModel
+                  motionEnabled={motionEnabled}
+                  scrollProgress={scrollProgress}
+                  entryProgress={entryProgress}
+                  demoProgress={demoProgress}
+                  retreatProgress={retreatProgress}
+                />
+              </Suspense>
+            </Canvas>
+          </div>
 
-        <Motion.aside
-          aria-label="ONDAM AI 솔루션"
-          className="absolute top-1/2 right-8 z-20 hidden w-[clamp(20rem,28vw,30rem)] -translate-y-1/2 xl:block min-[1600px]:right-[calc((100vw-1600px)/2)]"
-          style={{ pointerEvents: menuPointerEvents }}
-        >
-          <DesktopSolutionMenu scrollProgress={scrollYProgress} motionEnabled={motionEnabled} />
-        </Motion.aside>
+          <Motion.aside
+            aria-label="ONDAM AI 솔루션"
+            className="absolute top-1/2 right-8 z-20 hidden w-[clamp(20rem,28vw,30rem)] -translate-y-1/2 xl:block min-[1600px]:right-[calc((100vw-1600px)/2)]"
+            style={{ pointerEvents: menuPointerEvents }}
+          >
+            <DesktopSolutionMenu
+              scrollProgress={laptopFocusProgress}
+              motionEnabled={motionEnabled}
+            />
+          </Motion.aside>
+        </div>
       </div>
-    </div>
+
+      <section
+        id="solution-transition"
+        aria-labelledby="on-premise-title"
+        className="relative flex min-h-svh w-full items-center justify-center bg-[#fdfdfd] px-6 pt-[var(--site-header-height)] pb-16 text-center sm:px-8"
+      >
+        <div className="mx-auto w-full max-w-[1280px]">
+          <h2
+            id="on-premise-title"
+            className="text-[clamp(2.5rem,5.8vw,6.6rem)] leading-[1.12] font-semibold tracking-[-0.06em] text-slate-950 [text-wrap:balance]"
+          >
+            <span className="block">
+              기업의 <span className="text-[#0b5cff]">AI</span>를,
+            </span>
+            <span className="mt-[0.08em] block">기업의 환경 안에.</span>
+          </h2>
+          <p className="mt-8 text-[clamp(1rem,1.35vw,1.4rem)] leading-[1.7] font-medium tracking-[-0.02em] text-slate-600">
+            <span className="block">기업 환경에 맞춘 온프레미스 구축.</span>
+            <span className="block">필요한 모듈 도입부터 운영·업데이트까지.</span>
+          </p>
+        </div>
+      </section>
+
+      <section
+        ref={videoSection}
+        aria-label="ONDAM AI 인프라 영상"
+        className="relative w-full"
+        style={{ height: `${100 + ORIGINAL_SCROLL_VH * (1 - LAPTOP_STAGE_END)}vh` }}
+      >
+        <div className="sticky top-0 h-screen w-full overflow-hidden">
+          <StudioBackground backgroundRef={videoStudioBackground} />
+          <div
+            ref={videoLayer}
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 z-[15]"
+            style={{ visibility: 'hidden' }}
+          >
+            <video
+              ref={overhaulVideo}
+              muted
+              playsInline
+              preload="auto"
+              src="/videos/overhaul-scroll-intra.mp4"
+              className="absolute top-[51%] left-[37%] aspect-video w-[61vw] -translate-x-1/2 -translate-y-1/2 object-contain max-sm:top-1/2 max-sm:left-1/2 max-sm:w-[92vw]"
+              style={{
+                maskImage:
+                  'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent), linear-gradient(to bottom, transparent, black 2px, black calc(100% - 14px), transparent)',
+                maskComposite: 'intersect',
+                WebkitMaskImage:
+                  'linear-gradient(to right, transparent, black 20px, black calc(100% - 20px), transparent), linear-gradient(to bottom, transparent, black 2px, black calc(100% - 14px), transparent)',
+                WebkitMaskComposite: 'source-in',
+              }}
+              onLoadedData={() => {
+                if (videoHasFrame.current) return;
+                videoHasFrame.current = true;
+                window.dispatchEvent(new Event('scroll'));
+              }}
+              onSeeked={event => {
+                if (videoStageActive.current) {
+                  applyStudioColors(videoStudioBackground.current, event.currentTarget.currentTime);
+                }
+              }}
+              onLoadedMetadata={event => {
+                const video = event.currentTarget;
+                video.pause();
+                const frameDuration = 1 / 24;
+                const availableDuration = Math.max(
+                  video.duration - OVERHAUL_START_TIME - frameDuration,
+                  0
+                );
+                const targetTime = OVERHAUL_START_TIME + videoProgress.current * availableDuration;
+                desiredVideoTime.current = targetTime;
+                video.currentTime = targetTime;
+                lastVideoTime.current = targetTime;
+              }}
+            />
+          </div>
+        </div>
+      </section>
+    </>
   );
 }
 
