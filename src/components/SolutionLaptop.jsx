@@ -10,6 +10,7 @@ const PORTFOLIO_LOOK_AT_START = [14, 3, 0];
 const DISPLAY_WORLD_CENTER = [0, 8.72, -10.2];
 const FOCUSED_CAMERA_DESKTOP = [0, 8.72, 14];
 const FOCUSED_CAMERA_MOBILE = [0, 8.72, 26];
+const OVERHAUL_START_TIME = 0;
 const solutionLinks = [
   ['Discover', '#discover'],
   ['Control Internal', '#control-internal'],
@@ -233,7 +234,13 @@ function EmbeddedOndamScreen({ screenRef, iframeRef, onIframeLoad }) {
   );
 }
 
-function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgress }) {
+function LaptopModel({
+  motionEnabled,
+  scrollProgress,
+  entryProgress,
+  demoProgress,
+  retreatProgress,
+}) {
   const group = useRef(null);
   const screen = useRef(null);
   const iframe = useRef(null);
@@ -301,6 +308,7 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgres
         ? 1
         : 0;
     const entrance = THREE.MathUtils.smootherstep(entryMotion.current, 0, 1);
+    const retreat = THREE.MathUtils.smootherstep(retreatProgress.current, 0, 1);
 
     if (group.current) {
       group.current.position.set(
@@ -316,7 +324,9 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgres
       ? THREE.MathUtils.damp(focusProgress.current, scrollProgress.current, 5, delta)
       : scrollProgress.current;
     const progress = THREE.MathUtils.smoothstep(focusProgress.current, 0, 1);
-    const screenReveal = THREE.MathUtils.smoothstep(focusProgress.current, 0.88, 0.99);
+    const dashboardReveal = THREE.MathUtils.smoothstep(focusProgress.current, 0.88, 0.99);
+    const dashboardExit = THREE.MathUtils.smootherstep(retreatProgress.current, 0, 0.32);
+    const screenReveal = dashboardReveal * (1 - dashboardExit);
     if (logoMaterial.current) {
       logoMaterial.current.opacity = 1 - screenReveal;
     }
@@ -325,19 +335,41 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgres
     }
     const isMobile = state.size.width < 640;
     const focusedCamera = isMobile ? FOCUSED_CAMERA_MOBILE : FOCUSED_CAMERA_DESKTOP;
+    const retreatedCamera = isMobile ? [-22, 1, 42] : PORTFOLIO_CAMERA_START;
+    const retreatedLookAt = isMobile ? [8, 3, 0] : PORTFOLIO_LOOK_AT_START;
     const cameraPosition = cameraDestination.current.set(
-      THREE.MathUtils.lerp(isMobile ? -22 : PORTFOLIO_CAMERA_START[0], focusedCamera[0], progress),
-      THREE.MathUtils.lerp(isMobile ? 1 : PORTFOLIO_CAMERA_START[1], focusedCamera[1], progress),
-      THREE.MathUtils.lerp(isMobile ? 42 : PORTFOLIO_CAMERA_START[2], focusedCamera[2], progress)
+      THREE.MathUtils.lerp(
+        isMobile ? -22 : PORTFOLIO_CAMERA_START[0],
+        THREE.MathUtils.lerp(focusedCamera[0], retreatedCamera[0], retreat),
+        progress
+      ),
+      THREE.MathUtils.lerp(
+        isMobile ? 1 : PORTFOLIO_CAMERA_START[1],
+        THREE.MathUtils.lerp(focusedCamera[1], retreatedCamera[1], retreat),
+        progress
+      ),
+      THREE.MathUtils.lerp(
+        isMobile ? 42 : PORTFOLIO_CAMERA_START[2],
+        THREE.MathUtils.lerp(focusedCamera[2], retreatedCamera[2], retreat),
+        progress
+      )
     );
     const lookAtPosition = lookAtDestination.current.set(
       THREE.MathUtils.lerp(
         isMobile ? 8 : PORTFOLIO_LOOK_AT_START[0],
-        DISPLAY_WORLD_CENTER[0],
+        THREE.MathUtils.lerp(DISPLAY_WORLD_CENTER[0], retreatedLookAt[0], retreat),
         progress
       ),
-      THREE.MathUtils.lerp(3, DISPLAY_WORLD_CENTER[1], progress),
-      THREE.MathUtils.lerp(0, DISPLAY_WORLD_CENTER[2], progress)
+      THREE.MathUtils.lerp(
+        3,
+        THREE.MathUtils.lerp(DISPLAY_WORLD_CENTER[1], retreatedLookAt[1], retreat),
+        progress
+      ),
+      THREE.MathUtils.lerp(
+        0,
+        THREE.MathUtils.lerp(DISPLAY_WORLD_CENTER[2], retreatedLookAt[2], retreat),
+        progress
+      )
     );
 
     if (motionEnabled) {
@@ -387,9 +419,16 @@ function LaptopModel({ motionEnabled, scrollProgress, entryProgress, demoProgres
 export default function SolutionLaptop() {
   const section = useRef(null);
   const groundShadow = useRef(null);
+  const canvasLayer = useRef(null);
+  const videoLayer = useRef(null);
+  const overhaulVideo = useRef(null);
   const scrollProgress = useRef(0);
   const demoProgress = useRef(0);
   const entryProgress = useRef(0);
+  const retreatProgress = useRef(0);
+  const videoProgress = useRef(0);
+  const desiredVideoTime = useRef(0);
+  const lastVideoTime = useRef(-1);
   const [motionEnabled, setMotionEnabled] = useState(true);
   const { scrollYProgress } = useScroll({
     target: section,
@@ -424,14 +463,59 @@ export default function SolutionLaptop() {
           0,
           1
         );
-        const laptopProgress = THREE.MathUtils.clamp(progress / 0.4, 0, 1);
+        const laptopProgress = THREE.MathUtils.clamp(progress / 0.24, 0, 1);
+        const retreat = THREE.MathUtils.clamp((progress - 0.58) / 0.14, 0, 1);
+        const canvasExit = THREE.MathUtils.smootherstep(
+          THREE.MathUtils.clamp((progress - 0.7) / 0.035, 0, 1),
+          0,
+          1
+        );
+        const videoReveal = THREE.MathUtils.smootherstep(
+          THREE.MathUtils.clamp((progress - 0.745) / 0.055, 0, 1),
+          0,
+          1
+        );
+        const scrubProgress = THREE.MathUtils.clamp((progress - 0.8) / 0.2, 0, 1);
         scrollProgress.current = laptopProgress;
-        demoProgress.current = THREE.MathUtils.clamp((progress - 0.4) / 0.6, 0, 1);
+        demoProgress.current = THREE.MathUtils.clamp((progress - 0.24) / 0.34, 0, 1);
         entryProgress.current = entrance;
+        retreatProgress.current = retreat;
+        videoProgress.current = scrubProgress;
+
+        if (canvasLayer.current) {
+          canvasLayer.current.style.opacity = String(1 - canvasExit);
+        }
+        if (videoLayer.current) {
+          videoLayer.current.style.opacity = String(canvasExit);
+        }
+
+        if (overhaulVideo.current) {
+          const video = overhaulVideo.current;
+          video.style.opacity = String(videoReveal);
+          video.style.scale = String(0.965 + videoReveal * 0.035);
+          if (Number.isFinite(video.duration) && video.duration > 0) {
+            const frameDuration = 1 / 24;
+            const availableDuration = Math.max(
+              video.duration - OVERHAUL_START_TIME - frameDuration,
+              0
+            );
+            const targetTime = Math.min(
+              Math.round(
+                (OVERHAUL_START_TIME + scrubProgress * availableDuration) / frameDuration
+              ) * frameDuration,
+              Math.max(video.duration - frameDuration, 0)
+            );
+            desiredVideoTime.current = targetTime;
+            if (!video.seeking && Math.abs(targetTime - lastVideoTime.current) >= frameDuration) {
+              video.currentTime = targetTime;
+              lastVideoTime.current = targetTime;
+            }
+          }
+        }
 
         if (groundShadow.current) {
           groundShadow.current.style.opacity = String(
-            Math.max(0, 0.28 * entrance * (1 - laptopProgress * 2.2))
+            Math.max(0, 0.28 * entrance * (1 - laptopProgress * 2.2) * (1 - retreat))
           );
           groundShadow.current.style.transform = `translateX(-50%) scale(${(0.58 + entrance * 0.42) * (1 - laptopProgress * 0.12)})`;
         }
@@ -449,7 +533,7 @@ export default function SolutionLaptop() {
   }, []);
 
   return (
-    <div ref={section} className="relative h-[420vh] w-full">
+    <div ref={section} className="relative h-[720vh] w-full">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         <div aria-hidden="true" className="pointer-events-none absolute inset-0">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_58%_at_50%_72%,rgba(37,99,235,0.16)_0%,rgba(96,165,250,0.07)_40%,transparent_72%)]" />
@@ -471,22 +555,66 @@ export default function SolutionLaptop() {
           className="pointer-events-none absolute top-[79%] left-[38%] z-[5] h-[7%] w-[38%] max-w-[760px] rounded-[50%] bg-[radial-gradient(ellipse,rgba(5,16,38,0.5)_0%,rgba(20,56,110,0.2)_42%,transparent_74%)] blur-[10px] max-sm:top-[74%] max-sm:left-1/2 max-sm:w-[72%]"
           style={{ opacity: 0, transform: 'translateX(-50%) scale(0.78)' }}
         />
-        <Canvas
-          aria-hidden="true"
-          className="relative z-10"
-          camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
-          dpr={[1, 1.65]}
-          gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+        <div
+          ref={canvasLayer}
+          className="absolute inset-0 z-10"
+          style={{ opacity: 1, willChange: 'opacity' }}
         >
-          <Suspense fallback={null}>
-            <LaptopModel
-              motionEnabled={motionEnabled}
-              scrollProgress={scrollProgress}
-              entryProgress={entryProgress}
-              demoProgress={demoProgress}
-            />
-          </Suspense>
-        </Canvas>
+          <Canvas
+            aria-hidden="true"
+            camera={{ position: PORTFOLIO_CAMERA_START, fov: 55, near: 0.1, far: 200 }}
+            dpr={[1, 1.65]}
+            gl={{ alpha: true, antialias: true, powerPreference: 'high-performance' }}
+          >
+            <Suspense fallback={null}>
+              <LaptopModel
+                motionEnabled={motionEnabled}
+                scrollProgress={scrollProgress}
+                entryProgress={entryProgress}
+                demoProgress={demoProgress}
+                retreatProgress={retreatProgress}
+              />
+            </Suspense>
+          </Canvas>
+        </div>
+
+        <div
+          ref={videoLayer}
+          aria-hidden="true"
+          className="pointer-events-none absolute inset-0 z-[15] bg-[#f8fbff]"
+          style={{ opacity: 0, willChange: 'opacity' }}
+        >
+          <video
+            ref={overhaulVideo}
+            muted
+            playsInline
+            preload="auto"
+            src="/videos/overhaul-scroll.mp4"
+            className="absolute top-[51%] left-[37%] aspect-video w-[61vw] -translate-x-1/2 -translate-y-1/2 object-contain max-sm:top-1/2 max-sm:left-1/2 max-sm:w-[92vw]"
+            style={{ opacity: 0, scale: 0.965, willChange: 'opacity, scale' }}
+            onLoadedMetadata={event => {
+              const video = event.currentTarget;
+              video.pause();
+              const frameDuration = 1 / 24;
+              const availableDuration = Math.max(
+                video.duration - OVERHAUL_START_TIME - frameDuration,
+                0
+              );
+              const targetTime = OVERHAUL_START_TIME + videoProgress.current * availableDuration;
+              desiredVideoTime.current = targetTime;
+              video.currentTime = targetTime;
+              lastVideoTime.current = targetTime;
+            }}
+            onSeeked={event => {
+              const video = event.currentTarget;
+              const frameDuration = 1 / 24;
+              if (Math.abs(video.currentTime - desiredVideoTime.current) >= frameDuration) {
+                video.currentTime = desiredVideoTime.current;
+                lastVideoTime.current = desiredVideoTime.current;
+              }
+            }}
+          />
+        </div>
 
         <Motion.aside
           aria-label="ONDAM AI 솔루션"
