@@ -1,81 +1,7 @@
 import { useRef } from 'react';
-import { ArrowRight, Globe2, Layers3, Search, ShieldCheck } from 'lucide-react';
 import { motion as Motion, useInView, useReducedMotion } from 'motion/react';
 import GamgikAgentOrbWithFace from '../embedded/ondam_ai/components/character/GamgikAgentOrbWithFace.jsx';
-
-const cards = [
-  {
-    id: 'discover',
-    number: '01',
-    name: 'Discover',
-    description: ['AI 서비스를 발견하고,', '위험을 먼저 파악합니다.'],
-    icon: Search,
-  },
-  {
-    id: 'control-internal',
-    number: '02',
-    name: 'Control Internal',
-    description: ['사내 AI 사용 환경과', '이력을 한곳에서 관리합니다.'],
-    icon: ShieldCheck,
-  },
-  {
-    id: 'control-external',
-    number: '03',
-    name: 'Control External',
-    description: ['외부 AI 사용을 통제하고,', '기업의 데이터를 보호합니다.'],
-    icon: Globe2,
-  },
-  {
-    id: 'manage',
-    number: '04',
-    name: 'Manage',
-    description: ['AI App과 Agent를', '체계적으로 운영합니다.'],
-    icon: Layers3,
-  },
-];
-
-function SolutionCard({ card, reveal, index }) {
-  const Icon = card.icon;
-
-  return (
-    <Motion.a
-      id={card.id}
-      href={`/solutions/${card.id}`}
-      aria-label={`${card.name} 솔루션 자세히 보기`}
-      className="group relative flex min-h-[310px] scroll-mt-28 flex-col overflow-hidden rounded-[28px] border border-[#dfe8ff] bg-white/80 p-7 text-left shadow-[0_12px_38px_rgba(44,104,215,0.07)] backdrop-blur-sm transition-[border-color,box-shadow] duration-300 hover:border-blue-300 hover:shadow-[0_20px_48px_rgba(44,104,215,0.13)] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#0b5cff] sm:p-8"
-      {...reveal(index * 0.1)}
-    >
-      <div className="flex items-center justify-between gap-4">
-        <p className="text-xl font-semibold tracking-[-0.03em] text-[#4a80ff] sm:text-2xl">
-          {card.number}
-        </p>
-        <div
-          aria-hidden="true"
-          className="grid h-16 w-16 shrink-0 rotate-[-8deg] place-items-center rounded-[20px] border border-white bg-[linear-gradient(135deg,#f1f8ff,#c9ddff)] text-[#3684ff] shadow-[inset_0_2px_3px_white,0_10px_25px_rgba(60,125,255,0.13)] transition-transform duration-500 group-hover:rotate-0"
-        >
-          <Icon className="h-9 w-9" strokeWidth={1.6} />
-        </div>
-      </div>
-      <h3 className="mt-6 text-[clamp(1.5rem,1.65vw,2rem)] leading-tight font-semibold tracking-[-0.045em] text-slate-950">
-        {card.name}
-      </h3>
-      <p className="mt-4 mb-6 text-[clamp(1rem,1vw,1.125rem)] leading-[1.65] font-medium tracking-[-0.025em] break-keep text-slate-600">
-        {card.description.map(line => (
-          <span key={line} className="block">
-            {line}
-          </span>
-        ))}
-      </p>
-      <span className="mt-auto inline-flex items-center gap-2 pt-1 text-sm font-semibold text-[#0b5cff] sm:text-[15px]">
-        자세히 보기
-        <ArrowRight
-          aria-hidden="true"
-          className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
-        />
-      </span>
-    </Motion.a>
-  );
-}
+import OndamAsciiCards from './OndamAsciiCards.jsx';
 
 export default function SolutionOverview() {
   const characterRef = useRef(null);
@@ -140,11 +66,7 @@ export default function SolutionOverview() {
           </div>
         </Motion.div>
 
-        <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:gap-6">
-          {cards.map((card, index) => (
-            <SolutionCard key={card.id} card={card} reveal={reveal} index={index} />
-          ))}
-        </div>
+        <OndamAsciiCards />
       </div>
     </section>
   );
