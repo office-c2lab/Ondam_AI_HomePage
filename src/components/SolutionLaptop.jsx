@@ -95,10 +95,10 @@ function applyStudioColors(element, time = 0) {
 }
 
 const solutionLinks = [
-  ['Discover', '#discover'],
-  ['Control Internal', '#control-internal'],
-  ['Control External', '#control-external'],
-  ['Manage', '#manage'],
+  ['Discover', '/solutions/discover'],
+  ['Control Internal', '/solutions/control-internal'],
+  ['Control External', '/solutions/control-external'],
+  ['Manage', '/solutions/manage'],
 ];
 
 export function SolutionMenu({ compact = false }) {

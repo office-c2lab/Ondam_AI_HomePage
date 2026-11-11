@@ -45,10 +45,10 @@ export default function Header() {
         href: '/#platform',
         children: [
           { label: '플랫폼 개요', href: '/#platform-overview' },
-          { label: 'Discover', href: '/#discover' },
-          { label: 'Control Internal', href: '/#control-internal' },
-          { label: 'Control External', href: '/#control-external' },
-          { label: 'Manage', href: '/#manage' },
+          { label: 'Discover', href: '/solutions/discover' },
+          { label: 'Control Internal', href: '/solutions/control-internal' },
+          { label: 'Control External', href: '/solutions/control-external' },
+          { label: 'Manage', href: '/solutions/manage' },
         ],
       },
       {
