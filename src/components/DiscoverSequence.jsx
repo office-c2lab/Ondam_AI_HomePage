@@ -67,8 +67,7 @@ function MorphingWorld({ reducedMotion }) {
         const wrappedX = lerp(flatX, cylinderX, wrapProgress);
         const x = lerp(wrappedX, globeX, sphereProgress);
         const y = lerp(flatY, globeY, sphereProgress);
-        const backFade =
-          sphereZ < 0 ? lerp(1, 0.22, smoothStep(0.58, 0.92, progress)) : 1;
+        const backFade = sphereZ < 0 ? lerp(1, 0.22, smoothStep(0.58, 0.92, progress)) : 1;
 
         context.globalAlpha = backFade;
         context.beginPath();
